@@ -1,0 +1,77 @@
+{
+  "project_info": {
+    "project_number": "828399732110",
+    "firebase_url": "https://myquotes-7286e.firebaseio.com",
+    "project_id": "myquotes-7286e",
+    "storage_bucket": "myquotes-7286e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:828399732110:android:fad5be537458778f47d0df",
+        "android_client_info": {
+          "package_name": "com.ez.tong_tin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "828399732110-4fgrii2p838he35gn623sh9li643ttme.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT_CdxKYSpUfG3JrQxz4ZlKGvE8LXiUI4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "828399732110-4fgrii2p838he35gn623sh9li643ttme.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:828399732110:android:2e34a738832f59eb",
+        "android_client_info": {
+          "package_name": "goodtogo.com.myquotes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "828399732110-1o2ju4b7vcmbd0blr1jk9fij4smb4ofs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "goodtogo.com.myquotes",
+            "certificate_hash": "cfde052b4c5fb2f6b146c7c40a85b34485d0fc18"
+          }
+        },
+        {
+          "client_id": "828399732110-4fgrii2p838he35gn623sh9li643ttme.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCT_CdxKYSpUfG3JrQxz4ZlKGvE8LXiUI4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "828399732110-4fgrii2p838he35gn623sh9li643ttme.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
