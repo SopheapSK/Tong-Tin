@@ -44,6 +44,7 @@ doc/api/
 # Android related
 **/android/**/gradle-wrapper.jar
 **/android/.gradle
+Tong-Tin/android/.gradle
 **/android/captures/
 **/android/gradlew
 **/android/gradlew.bat

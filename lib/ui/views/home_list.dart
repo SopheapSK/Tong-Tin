@@ -5,8 +5,10 @@ import 'package:TonTin/core/services/api.dart';
 import 'package:TonTin/core/viewmodels/CRUDModel.dart';
 import 'package:TonTin/model/lesson_model.dart';
 import 'package:TonTin/ui/views/home_detail_list.dart';
+import 'package:TonTin/ui/views/tong_tin_detail_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class ListPage extends StatefulWidget {
@@ -21,7 +23,6 @@ class ListPage extends StatefulWidget {
 class _ListPageState extends State<ListPage> {
   List<DocumentSnapshot> _snapshot;
   final USER_ID = "xm0RJnDMeW6ggADBFKDY";
-
   @override
   void initState() {
 
@@ -41,7 +42,7 @@ class _ListPageState extends State<ListPage> {
 
                 return _buildList(context, _snapshot);
               } else {
-                return Text('fetching');
+                return Text('fetching', style: TextStyle(color: Colors.white),);
               }
             }));
 
@@ -71,7 +72,7 @@ class _ListPageState extends State<ListPage> {
                     width: 16.0,
                   ),
                   new Text(
-                    'CREATE NEW ITEM',
+                    'CREATE NEW ITEM' ,
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 18.0,
@@ -195,16 +196,16 @@ ListTile makeListTile(BuildContext context, Property property) {
             child: Container(
               // tag: 'hero',
               child: LinearProgressIndicator(
-                  backgroundColor: Color.fromRGBO(209, 224, 224, 0.2),
+                  backgroundColor: Colors.white,
                   value: (calculateRemainPeopleInPercentage(property.people.toDouble(), property.paidMonth.toDouble())),
-                  valueColor: AlwaysStoppedAnimation(Colors.green)),
+                  valueColor: AlwaysStoppedAnimation(Colors.blueAccent)),
             )),
         Expanded(
           flex: 4,
           child: Padding(
               padding: EdgeInsets.only(left: 10.0),
               child:
-              Text(' ${property.paidMonth}/${property.people} People/ \$${property.amount.toStringAsFixed(2)}',
+              Text(' ១ក្បាល​: \$${property.amount.toStringAsFixed(2)} \n ដេញហើយ${property.paidMonth}/${property.people} នាក់. \n ការខែមុន:\$${property.amount * property.interest}',
                   style: TextStyle(color: Colors.white))),
         )
       ],
@@ -218,7 +219,7 @@ ListTile makeListTile(BuildContext context, Property property) {
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => DetailPage(property: property)));
+              builder: (context) => DetailTongTinPage(property: property)));
     },
   );
 }

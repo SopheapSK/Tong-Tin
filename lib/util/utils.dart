@@ -2,6 +2,7 @@
 import 'package:TonTin/util/share_pref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
 import 'dart:convert' as JSON;
@@ -50,5 +51,9 @@ class Utils{
   }
 
 
+  static  String dateConvert(int milli){
+    final df = new DateFormat('dd-MM-yyyy');
+   return df.format(new DateTime.fromMillisecondsSinceEpoch(milli*1000));
+  }
 
 }
