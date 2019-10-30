@@ -34,10 +34,11 @@ class Property {
   int paidMonth;
   double amount;
   double interest;
-
+  List<dynamic> listTrack;
+  bool isDead;
 
   Property(
-      { this.people, this.paidMonth, this.userId, this.createOn, this.startOn, this.title , this.interest});
+      { this.people, this.paidMonth, this.userId, this.createOn, this.startOn, this.title , this.interest, this.listTrack, this.isDead});
 
   Property.fromMap(Map snapshot, String id)
       :
@@ -47,9 +48,12 @@ class Property {
         startOn = snapshot['startOn'] ?? 0,
         title = snapshot['title'] ?? '',
         userId = snapshot['userId'] ?? '',
+        isDead = snapshot['isDead'] ?? false,
+        listTrack = snapshot['monthTrack'] != null ? List.from(snapshot['monthTrack']) : new List(),
         people  = snapshot['totalPeople'] != null ? snapshot['totalPeople'].toInt() : 0,
         amount = snapshot['amount'] != null ? snapshot['amount'].toDouble() : 0.0,
         interest =  snapshot['interest'] != null?  snapshot['interest'].toDouble() : 0.0;
+
 
 
   toJson() {
@@ -60,7 +64,9 @@ class Property {
       "createOn" : createOn,
       "startOn" : startOn,
       "title" :title,
-      "userId" : userId
+      "userId" : userId,
+      "monthTrack" : listTrack,
+      "isDead" : isDead
 
     };
   }

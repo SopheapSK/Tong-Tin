@@ -49,4 +49,8 @@ class Api {
   Future<void> updateDocument(Map data, String id) {
     return ref.document(id).updateData(data);
   }
+  Future<void> updateDocumentProperty(Map data, String userID, String id) {
+    return ref.firestore.collection(PROPERTY + userID).document(id).updateData(data);
+  }
+
 }

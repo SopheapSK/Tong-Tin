@@ -84,7 +84,6 @@ class _CreatePropertyState extends State<CreateProperty> {
     final vTitle = TextFormField(
       controller: tTitleController,
       keyboardType: TextInputType.text,
-      autofocus: true,
       autovalidate: _isAutoValidate,
       autocorrect: false,
       validator: (value) {
@@ -104,7 +103,6 @@ class _CreatePropertyState extends State<CreateProperty> {
     final vPrice = TextFormField(
       controller: tPriceController,
       keyboardType: TextInputType.number,
-      autofocus: true,
       autovalidate: _isAutoValidate,
       validator: (value) {
         if (value.isEmpty) {
@@ -121,7 +119,6 @@ class _CreatePropertyState extends State<CreateProperty> {
     final vInterest = TextFormField(
       controller: tInterestController,
       keyboardType: TextInputType.number,
-      autofocus: true,
       validator: (value) {
         if (value.isEmpty) {
           return 'Please Enter Data';

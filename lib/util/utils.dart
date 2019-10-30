@@ -56,4 +56,20 @@ class Utils{
    return df.format(new DateTime.fromMillisecondsSinceEpoch(milli*1000));
   }
 
+  static  String addMonth(int milli, int month){
+    final df = new DateFormat('dd-MM-yyyy');
+    var date = new DateTime.fromMillisecondsSinceEpoch(milli*1000);
+    var dateAddMonth = new DateTime(date.year,  date.month + month,  date.day);
+    return df.format(dateAddMonth);
+  }
+
+  static bool isDateMatch(String compareDate){
+    print('how many call ???');
+    var sub = compareDate.substring(3);
+    var now = new DateTime.now();
+    var formatter = new DateFormat('MM-yyyy');
+    String currentDate = formatter.format(now);
+
+    return sub == currentDate;
+  }
 }

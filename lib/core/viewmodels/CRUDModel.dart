@@ -46,6 +46,11 @@ class CRUDModel extends ChangeNotifier {
     await _api.updateDocument(data.toJson(), id) ;
     return ;
   }
+  Future updateProperty(Property data, String userID,String id) async{
+    await _api.updateDocumentProperty(data.toJson(), userID, id) ;
+    return ;
+  }
+
 
   Future addProduct(Product data) async{
     var result  = await _api.addDocument(data.toJson()) ;

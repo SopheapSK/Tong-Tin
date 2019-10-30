@@ -153,18 +153,18 @@ class _ListPageState extends State<ListPage> {
 
 Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
 
-  List<Property> listUser = new List();
+  List<Property> list = new List();
   snapshot.forEach((f){
-    listUser.add(Property.fromMap(f.data, f.documentID));
-
+    list.add(Property.fromMap(f.data, f.documentID));
   });
 
   return ListView(
       padding: const EdgeInsets.only(top: 10.0),
-      children:listUser.map((data) => makeCard(context, data)).toList());
+      children:list.map((data) => makeCard(context, data)).toList());
 }
 
 Widget makeCard(BuildContext context, Property data) => Card(
+
       elevation: 0.0,
       margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
       child: Container(
@@ -174,6 +174,7 @@ Widget makeCard(BuildContext context, Property data) => Card(
     );
 
 ListTile makeListTile(BuildContext context, Property property) {
+
    return ListTile(
     contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
     leading: Container(
@@ -205,7 +206,7 @@ ListTile makeListTile(BuildContext context, Property property) {
           child: Padding(
               padding: EdgeInsets.only(left: 10.0),
               child:
-              Text(' ១ក្បាល​: \$${property.amount.toStringAsFixed(2)} \n ដេញហើយ${property.paidMonth}/${property.people} នាក់. \n ការខែមុន:\$${property.amount * property.interest}',
+              Text(' ១ក្បាល​: \$${property.amount.toStringAsFixed(2)} \n ដេញហើយ${property.listTrack.length.toString()}/${property.people} នាក់. \n ការខែមុន:\$${property.amount * property.interest}',
                   style: TextStyle(color: Colors.white))),
         )
       ],
@@ -215,7 +216,7 @@ ListTile makeListTile(BuildContext context, Property property) {
         child: Icon(Icons.keyboard_arrow_right,
             color: Colors.white, size: 16.0)),
     onTap: () {
-
+      property.userId = 'xm0RJnDMeW6ggADBFKDY';
       Navigator.push(
           context,
           MaterialPageRoute(
