@@ -37,6 +37,10 @@ class CRUDModel extends ChangeNotifier {
     return  Product.fromMap(doc.data, doc.documentID) ;
   }
 
+  Future<Property> getPropertyById(String id) async {
+    var doc = await _api.getPropertyById(id);
+    return  Property.fromMap(doc.data, doc.documentID) ;
+  }
 
   Future removeProduct(String id) async{
      await _api.removeDocument(id) ;
@@ -59,9 +63,9 @@ class CRUDModel extends ChangeNotifier {
 
   }
 
-  Future addNewProperty(Property data) async{
+  Future addNewProperty(Property data, String userID) async{
     print('result: ${data.toJson()}' );
-    await _api.updateDocument(data.toJson(), "mo") ;
+    await _api.addProperty(data.toJson(), userID) ;
 
     return ;
 

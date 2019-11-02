@@ -23,7 +23,7 @@ class Api {
     return ref.getDocuments();
   }
   Stream<QuerySnapshot> streamPropertiesCollection(String userID) {
-    return ref.firestore.collection(PROPERTY + userID).snapshots();
+    return ref.firestore.collection(PROPERTY + userID).orderBy('createOn', descending: true).snapshots();
   }
 
   Stream<QuerySnapshot> streamMembersCollection() {
@@ -37,6 +37,9 @@ class Api {
   Future<DocumentSnapshot> getDocumentById(String id) {
     return ref.document(id).get();
   }
+  Future<DocumentSnapshot> getPropertyById(String id) {
+    return ref.firestore.document(PROPERTY+id).get();
+  }
 
   Future<void> removeDocument(String id) {
     return ref.document(id).delete();
@@ -44,6 +47,9 @@ class Api {
 
   Future<DocumentReference> addDocument(Map data) {
     return ref.add(data);
+  }
+  Future<DocumentReference> addProperty(Map data, String userID) {
+    return ref.firestore.collection(PROPERTY+userID).add(data);
   }
 
   Future<void> updateDocument(Map data, String id) {

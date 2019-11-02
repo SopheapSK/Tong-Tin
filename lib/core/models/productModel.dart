@@ -34,22 +34,22 @@ class Property {
   int paidMonth;
   double amount;
   double interest;
-  List<dynamic> listTrack;
+  Map<dynamic, dynamic> listTrack;
   bool isDead;
 
   Property(
-      { this.people, this.paidMonth, this.userId, this.createOn, this.startOn, this.title , this.interest, this.listTrack, this.isDead});
+      { this.people, this.paidMonth, this.userId, this.createOn, this.startOn, this.title , this.interest, this.listTrack, this.isDead, this.amount});
 
   Property.fromMap(Map snapshot, String id)
       :
         id = id ?? '',
-        paidMonth = snapshot['paidMonth'] ?? 0,
-        createOn = snapshot['createOn'] ?? 0,
-        startOn = snapshot['startOn'] ?? 0,
-        title = snapshot['title'] ?? '',
-        userId = snapshot['userId'] ?? '',
-        isDead = snapshot['isDead'] ?? false,
-        listTrack = snapshot['monthTrack'] != null ? List.from(snapshot['monthTrack']) : new List(),
+        paidMonth = snapshot['paidMonth'] != null ? snapshot['paidMonth'] : 0,
+        createOn = snapshot['createOn'] != null ? snapshot['createOn'] : 0,
+        startOn = snapshot['startOn'] != null ? snapshot['startOn'] : 0,
+        title = snapshot['title'] != null ? snapshot['title'] : '',
+        userId = snapshot['userId'] != null ? snapshot['userId'] :  '',
+        isDead = snapshot['isDead'] != null ? snapshot['isDead'] : false,
+        listTrack = snapshot['monthTrack'] != null ?  snapshot['monthTrack'] : new Map(),
         people  = snapshot['totalPeople'] != null ? snapshot['totalPeople'].toInt() : 0,
         amount = snapshot['amount'] != null ? snapshot['amount'].toDouble() : 0.0,
         interest =  snapshot['interest'] != null?  snapshot['interest'].toDouble() : 0.0;

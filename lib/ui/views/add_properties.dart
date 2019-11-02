@@ -1,5 +1,7 @@
 import 'dart:convert' as JSON;
 
+import 'package:TonTin/core/models/productModel.dart';
+import 'package:TonTin/core/viewmodels/CRUDModel.dart';
 import 'package:TonTin/item/account.dart';
 import 'package:TonTin/item/login_token.dart';
 import 'package:TonTin/util/AESImpl.dart';
@@ -8,8 +10,11 @@ import 'package:TonTin/util/constant.dart';
 import 'package:TonTin/util/share_pref.dart';
 import 'package:TonTin/util/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibrate/vibrate.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 
 
 class CreateProperty extends StatefulWidget {
@@ -19,17 +24,18 @@ class CreateProperty extends StatefulWidget {
 }
 
 class _CreatePropertyState extends State<CreateProperty> {
+  final USER_ID = "xm0RJnDMeW6ggADBFKDY";
+  final df = new DateFormat('dd-MM-yyyy');
 
   String _title, _price, _interest;
 
-  final userNameController = TextEditingController();
+
+
   final tTitleController = TextEditingController();
   final tPriceController = TextEditingController();
-  final tInterestController = TextEditingController();
-  final tTotalMonthController = TextEditingController();
-  final tPaidMonthController = TextEditingController();
-  final tStartDateController = TextEditingController();
-  final passwordController = TextEditingController();
+  final tTotalPeopleController = TextEditingController();
+
+
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   final _formKey = GlobalKey<FormState>();
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -37,8 +43,10 @@ class _CreatePropertyState extends State<CreateProperty> {
 
   @override
   void dispose() {
-    userNameController.dispose();
-    passwordController.dispose();
+    tTitleController.dispose();
+    tPriceController.dispose();
+    tTotalPeopleController.dispose();
+
     super.dispose();
   }
   @override
@@ -56,6 +64,8 @@ class _CreatePropertyState extends State<CreateProperty> {
 
   @override
   Widget build(BuildContext context) {
+    String _currentDateTime =  df.format(new DateTime.now());
+    var propertyProvider = Provider.of<CRUDModel>(context);
 
     final topContent = InkWell(
       onTap: () {
@@ -92,10 +102,9 @@ class _CreatePropertyState extends State<CreateProperty> {
         }
         return null;
       },
-      onSaved: (val) => _title = val,
 
       decoration: InputDecoration(
-        hintText: 'ex: Land in PP, House in KPS...',
+        hintText: 'ex: Tong Tin 200 \$ ...',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
       ),
@@ -111,13 +120,14 @@ class _CreatePropertyState extends State<CreateProperty> {
         return null;
       },
       decoration: InputDecoration(
-        hintText: 'ex: 12500 (\$)',
+        hintText: 'ex: 200 (\$)',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
       ),
     );
-    final vInterest = TextFormField(
-      controller: tInterestController,
+    final vTotalPeople = TextFormField(
+
+      controller: tTotalPeopleController,
       keyboardType: TextInputType.number,
       validator: (value) {
         if (value.isEmpty) {
@@ -126,61 +136,35 @@ class _CreatePropertyState extends State<CreateProperty> {
         return null;
       },
       decoration: InputDecoration(
-        hintText: 'ex: 0.3% per month',
+        hintText: 'ex: 10 នាក់',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
       ),
     );
 
-    final vTotalMonth = TextFormField(
-      controller: tTotalMonthController,
-      validator: (value) {
-        if (value.isEmpty) {
-          return 'Please Enter Data';
-        }
-        return null;
-      },
-      keyboardType: TextInputType.number,
-      autofocus: false,
-      decoration: InputDecoration(
-        hintText: '24 Months = 2 Years',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
-      ),
-    );
-    final vPaidMonth = TextFormField(
-      controller: tPaidMonthController,
-      keyboardType: TextInputType.number,
-      autofocus: false,
-      decoration: InputDecoration(
-        hintText: 'ex: 10 Months',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
-      ),
-    );
-    final vStartMonth = TextFormField(
-      controller: tStartDateController,
-      keyboardType: TextInputType.datetime,
-      autofocus: false,
-      decoration: InputDecoration(
-        hintText: '01-01-2019',
-        errorText: 'Wat',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
-      ),
-    );
 
-    final password = TextFormField(
-      controller: passwordController,
-      autofocus: false,
-      keyboardType: TextInputType.number,
-      obscureText: true,
-      decoration: InputDecoration(
-        hintText: 'Password',
-        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
-      ),
-    );
+
+    final vStartMonth = OutlineButton(
+        shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(24.0)),
+        onPressed: () {
+          DatePicker.showDatePicker(context,
+              showTitleActions: true,
+              minTime: DateTime(2018, 3, 5),
+              maxTime: DateTime(2099, 6, 7), onChanged: (date) {
+                print('change $date');
+              }, onConfirm: (date) {
+                print('confirm $date');
+                setState(() {
+                  _currentDateTime = df.format(date);
+                });
+              }, currentTime: DateTime.now(), locale: LocaleType.en);
+        },
+        child: Text(
+          _currentDateTime,
+          style: TextStyle(color: Colors.blue),
+        ));
+
+
 
     var progressBar = new Container(
       decoration: new BoxDecoration(color: Colors.white),
@@ -225,15 +209,18 @@ class _CreatePropertyState extends State<CreateProperty> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               new RaisedButton(
-                  onPressed: () {
-                    //Navigator.pop(context);
+                  onPressed: () async {
                     setState(() {
                       _isAutoValidate = true;
                     });
+
+
                     if (_formKey.currentState.validate()) {
                       _formKey.currentState.save();
                       // If the form is valid, display a Snackbar.
                       //showSnakeBar(context);
+                      Utils.showBottomSheet(context);
+                      _startSubmitData(propertyProvider, _currentDateTime);
                     }
 
                   },
@@ -276,28 +263,20 @@ class _CreatePropertyState extends State<CreateProperty> {
           topContent,
           logo,
           SizedBox(height: 28.0),
-          guideLine('Your Short Title(ex: Land in PP, House in KPS)'),
+          guideLine('កំណត់ចំណាំខ្លី(ex: Tong Tin 100\$)'),
           vTitle,
           SizedBox(height: 20.0),
-          guideLine('Your Property\'s Price(ex: 12500) (\$)'),
+          guideLine('លេងមួយក្បាលប៉ុន្មាន (\$)?'),
           vPrice,
           SizedBox(height: 20.0),
-          guideLine('Your Property\'s Interest(ex: 0.3%) (per month)'),
-          vInterest,
+          guideLine('ចំនួនអ្នកលេង'),
+          vTotalPeople,
+
           SizedBox(height: 20.0),
-          guideLine('Total Months/Years to Pay'),
-          vTotalMonth,
-          SizedBox(height: 20.0),
-          guideLine('How many Month(s) you paid Money? (Optional)'),
-          vPaidMonth,
-          SizedBox(height: 20.0),
-          guideLine('When do you start Pay for First Time? (Optional)' ),
+          guideLine('ថ្ងៃចាប់ផ្តើមលេង'),
           vStartMonth,
-          SizedBox(height: 20.0),
-          password,
           SizedBox(height: 24.0),
           confirmBtn,
-          forgotLabel,
 
 
         ],
@@ -318,6 +297,25 @@ class _CreatePropertyState extends State<CreateProperty> {
       var _type = FeedbackType.success;
       Vibrate.feedback(_type);
     }
+  }
+
+  Future _startSubmitData( CRUDModel provider, String date) async {
+
+
+
+    var startDate = new DateFormat('dd-MM-yyyy').parse(date).millisecondsSinceEpoch;
+    var createDate = DateTime.now().millisecondsSinceEpoch;
+    Property property = new Property(people: int.parse(tTotalPeopleController.text),
+        title: tTitleController.text, startOn: startDate, createOn: createDate, amount: double.parse(tPriceController.text));
+
+    provider.addNewProperty(property, USER_ID);
+
+
+    await new Future.delayed(const Duration(seconds: 2));
+    Navigator.pop(context);
+    await Utils.startHapticSuccess();
+    await new Future.delayed(const Duration(seconds: 1));
+    Navigator.pop(context);
   }
 
 }

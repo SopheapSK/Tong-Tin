@@ -23,6 +23,8 @@ class ListPage extends StatefulWidget {
 class _ListPageState extends State<ListPage> {
   List<DocumentSnapshot> _snapshot;
   final USER_ID = "xm0RJnDMeW6ggADBFKDY";
+  bool isHomeActive = true;
+  bool isProfileActive = false;
   @override
   void initState() {
 
@@ -83,27 +85,34 @@ class _ListPageState extends State<ListPage> {
         ]));
 
     final makeBottom = Container(
-      height: 55.0,
+      height: 60.0,
       child: BottomAppBar(
         color: Color.fromRGBO(58, 66, 86, 1.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.home, color: Colors.white),
-              onPressed: () {},
+              icon: Icon(Icons.home, color:  isHomeActive ? Colors.lightBlue : Colors.white70,),
+              onPressed: () {
+                if(isHomeActive) return;
+                setState(() {
+                  isProfileActive = !isProfileActive;
+                  isHomeActive = !isHomeActive;
+
+                });
+              },
             ),
+
             IconButton(
-              icon: Icon(Icons.blur_on, color: Colors.white),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.hotel, color: Colors.white),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: Icon(Icons.account_box, color: Colors.white),
-              onPressed: () {},
+              icon: Icon(Icons.account_box, color: isProfileActive ? Colors.lightBlue : Colors.white70,),
+              onPressed: () {
+                if(isProfileActive) return;
+                setState(() {
+                  isProfileActive = !isProfileActive;
+                  isHomeActive = !isHomeActive;
+
+                });
+              },
             )
           ],
         ),
