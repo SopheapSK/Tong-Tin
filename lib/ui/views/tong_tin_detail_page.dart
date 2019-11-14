@@ -2,6 +2,7 @@ import 'package:TonTin/core/models/productModel.dart';
 import 'package:TonTin/core/viewmodels/CRUDModel.dart';
 import 'package:TonTin/model/lesson_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../util/utils.dart';
@@ -17,7 +18,15 @@ class DetailTongTinPage extends StatefulWidget {
 
 class _DetailTongTinPageState extends State<DetailTongTinPage> {
   List<TextEditingController> _controllers = new List();
-
+  Property insideProperty;
+  @override
+  void initState() {
+    // TODO: implement initState
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
+    super.initState();
+    if(mounted)
+      insideProperty = widget.property;
+  }
   @override
   void dispose() {
     // TODO: implement dispose
@@ -35,7 +44,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
           child: Text(
-            widget.property.title,
+            insideProperty.title,
             style: TextStyle(color: Colors.white, fontSize: 20.0),
           ),
         ),
@@ -43,7 +52,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
     );
 
     final topContent = Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
       Container(
         margin: EdgeInsets.all(16.0),
@@ -52,10 +61,30 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
             Navigator.pop(context);
           },
           child: new Hero(
-              tag: widget.property.id,
+              tag: insideProperty.id,
               child: Icon(Icons.arrow_back, color: Colors.white)),
         ),
-      )
+      ),
+
+      Container(
+        margin: EdgeInsets.all(16.0),
+        child: InkWell(
+          onTap: () {
+            _confirmDoneBid(context, 1, insideProperty);
+           // Navigator.pop(context);
+          },
+          child: Icon(Icons.cloud_done, color: Colors.white),
+        ),
+      ),
+      Container(
+        margin: EdgeInsets.all(16.0),
+        child: InkWell(
+          onTap: () {
+            _confirmDelete(context, 1, widget.property);
+          },
+          child: Icon(Icons.delete_forever, color: Colors.white),
+        ),
+      ),
     ],);
 
 
@@ -70,8 +99,8 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
             ),
             topContent,
             topContentText,
-            headerInfo(context, widget.property),
-            Expanded(child: _buildList(context, widget.property))
+            headerInfo(context, insideProperty),
+            Expanded(child: _buildList(context, insideProperty))
           ],
         ),
       ),
@@ -246,11 +275,13 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
           )
         ],
       ),
-      trailing: GestureDetector(onTap: ()=> _showBottomSheet(context, index, property)
+      trailing: GestureDetector(
+          onTap: ()=> _showBottomSheet(context, index, property)
           , child: Icon(Icons.edit, color: Colors.white, size: 20.0)),
-      onTap: () {
-        print('tap for more');
-       // Utils.showBottomSheet(context);
+
+      onLongPress: () {
+       // print('tap for more');
+        _confirmRemoveInterest(context, index, property);
 
       },
     );
@@ -259,6 +290,262 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
   }
 
   void _showBottomSheet(BuildContext context, int index, Property property){
+
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),
+        ),
+        builder: (context) {
+          return Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 16.0,
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        child: Text('ការប្រាក់សម្រាប់ខែទី ${index + 1}',)
+
+                    ),
+                    SizedBox(
+                      height: 8.0,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          bottom: 10.0),
+                      child: new TextField(
+                        keyboardType: TextInputType.number,
+                        controller: _controllers[index],
+                        decoration: InputDecoration(
+                          prefixIcon: Icon(Icons.attach_money, size: 12.0,),
+                          hintText: '(ex: 12.5\$ ) ',
+                          contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 10.0, 10.0),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
+                        ),
+
+
+                      ),
+                    ),
+                    SizedBox(
+                      height: 4.0,
+                    ),
+                    _buttonSubmit(context,index, property),
+
+
+                    SizedBox(height: 32),
+
+
+                  ],
+                ),
+              ),
+            ),
+          );
+        });
+  }
+  Widget _buttonBid( BuildContext context, Property property){
+    return new Center(
+        child: new RaisedButton(
+            onPressed: () async {
+              // Navigator.pushNamed(context, '/create');
+              updateDoneBid(context, property);
+              Navigator.pop(context);
+            },
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24.0),
+            ),
+            color: Colors.blue,
+            child: new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new Icon(
+                  Icons.cloud_done,
+                  color: Colors.white,
+                  size: 24.0,
+                ),
+                SizedBox(
+                  width: 16.0,
+                ),
+                new Text(
+                  '\t យល់ព្រម  \t  \t \t' ,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            )));
+  }
+  Widget _buttonSubmit( BuildContext context,int index, Property property){
+    return new Center(
+        child: new RaisedButton(
+            onPressed: () async {
+              updateData(context, index, property);
+              Navigator.pop(context);
+            },
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24.0),
+            ),
+            color: Colors.blue,
+            child: new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new Icon(
+                  Icons.donut_large,
+                  color: Colors.white,
+                  size: 24.0,
+                ),
+                SizedBox(
+                  width: 16.0,
+                ),
+                new Text(
+                  ' \t យល់ព្រម \t \t \t \t' ,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            )));
+  }
+
+  Widget _buttonDeleteInterest( BuildContext context,int index, Property property){
+    return new Center(
+        child: new RaisedButton(
+            onPressed: () async {
+              // Navigator.pushNamed(context, '/create');
+              updateRemoveInterest(context, index, property);
+              Navigator.pop(context);
+
+            },
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24.0),
+            ),
+            color: Colors.blue,
+            child: new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new Icon(
+                  Icons.delete_sweep,
+                  color: Colors.white,
+                  size: 24.0,
+                ),
+                SizedBox(
+                  width: 16.0,
+                ),
+                new Text(
+                  '\t យល់ព្រម \t \t \t \t \t ' ,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            )));
+  }
+  Widget _buttonDeleteTongTin( BuildContext context,int index, Property property){
+    return new Center(
+        child: new RaisedButton(
+            onPressed: () async {
+              deleteThisTongTin(property);
+              Navigator.pop(context);
+
+            },
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24.0),
+            ),
+            color: Colors.green,
+            child: new Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                new Icon(
+                  Icons.delete_forever,
+                  color: Colors.white,
+                  size: 24.0,
+                ),
+                SizedBox(
+                  width: 16.0,
+                ),
+                new Text(
+                  '\t \t យល់ព្រម \t  \t \t \t \t' ,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            )));
+  }
+
+
+  void deleteThisTongTin(Property property){
+    //property.title = "la la la ";
+    setState(() {
+      insideProperty = property;
+    });
+
+  }
+
+  void updateData(BuildContext context, int index, Property property){
+    String interest = _controllers[index].text;
+    print('=> interst $interest');
+    if(interest.isEmpty) return;
+    if(property.listTrack.containsKey('month$index')){
+      property.listTrack['month$index'] =  double.parse(interest);
+
+      var productProvider = Provider.of<CRUDModel>(context);
+      print('user id ${property.userId}');
+      productProvider.updateProperty(property, property.userId, property.id);
+    }else {
+      property.listTrack['month$index'] =  double.parse(interest);
+      var productProvider = Provider.of<CRUDModel>(context);
+      print('user id ${property.userId}');
+      productProvider.updateProperty(property, property.userId, property.id);
+
+    }
+    setState(() {
+      insideProperty = property;
+    });
+
+  }
+  void updateDoneBid(BuildContext context, Property property){
+    var productProvider = Provider.of<CRUDModel>(context);
+
+    property.isDead = !property.isDead;
+    print('user id ${property.userId}');
+    productProvider.updateProperty(property, property.userId, property.id);
+    setState(() {
+      insideProperty = property;
+    });
+  }
+  void updateRemoveInterest(BuildContext context, int index, Property property){
+
+    if( property.listTrack.containsKey('month$index')){
+      property.listTrack.remove('month$index');
+      var productProvider = Provider.of<CRUDModel>(context);
+      print('user id ${property.userId}');
+      productProvider.updateProperty(property, property.userId, property.id);
+      setState(() {
+        insideProperty = property;
+      });
+    }
+
+  }
+
+  void _confirmDelete(BuildContext context, int index, Property property){
 
     showModalBottomSheet(
         context: context,
@@ -280,215 +567,87 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
                   ),
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text('ការប្រាក់សម្រាប់ខែទី ${index + 1}',)
+                      child: Text('លុបតុងទីននេះចោល?',)
 
                   ),
-                  SizedBox(
-                    height: 8.0,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(
-                        bottom:10.0),
-                    child: new TextField(
-                      keyboardType: TextInputType.number,
-                      controller: _controllers[index],
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.attach_money, size: 12.0,),
-                        hintText: '(ex: 12.5\$ ) ',
-                        contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 10.0, 10.0),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
-                      ),
+                  SizedBox(height: 10),
+                  _buttonDeleteTongTin(context, index, property),
+                  SizedBox(height: 10),
 
-
-                    ),
-                  ),
-                  SizedBox(
-                    height: 4.0,
-                  ),
-                  _buttonSubmit(context,index, property),
-                  SizedBox(height: 32),
-                  Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text('លុបការប្រាក់សម្រាប់ខែទី ${index + 1}ចោល?',)
-
-                  ),
-                  _buttonDeleteInterest(context, index, property),
-
-                  SizedBox(height: 32),
-
-                  Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text('បើអ្នកដេញរួចហើយ សុមចុចប៊ូតុងខាងក្រមនេះ',)
-
-                  ),
-
-                  _buttonBid(context, property),
                 ],
               ),
             ),
           );
         });
   }
-  Widget _buttonBid( BuildContext context, Property property){
-    return new Center(
-        child: new RaisedButton(
-            onPressed: () async {
-              // Navigator.pushNamed(context, '/create');
-              updateDoneBid(context, property);
-              Navigator.pop(context);
-              Utils.showBottomSheet(context);
-              await new Future.delayed(const Duration(seconds: 2));
-              Navigator.pop(context);
-              await Utils.startHapticSuccess();
-              await new Future.delayed(const Duration(seconds: 1));
-              Navigator.pop(context);
-            },
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24.0),
+  void _confirmDoneBid(BuildContext context, int index, Property property){
+
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),
+        ),
+        builder: (context) {
+          return Container(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  SizedBox(
+                    height: 16.0,
+                  ),
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Text('បើអ្នកដេញរួចហើយ សុមចុចប៊ូតុងយល់ប្រមខាងក្រមនេះ',)
+
+                  ),
+                  SizedBox(height: 10.0),
+                  _buttonBid(context, property),
+                  SizedBox(height: 10.0),
+
+                ],
+              ),
             ),
-            color: Colors.blue,
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Hero(child: new Icon(
-                  Icons.cloud_done,
-                  color: Colors.white,
-                  size: 24.0,
-                ), tag: 'hero_1',
-                ),
-                SizedBox(
-                  width: 16.0,
-                ),
-                new Text(
-                  '\t DONE BID ? \t  \t \t' ,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            )));
+          );
+        });
   }
-  Widget _buttonSubmit( BuildContext context,int index, Property property){
-    return new Center(
-        child: new RaisedButton(
-            onPressed: () async {
-              // Navigator.pushNamed(context, '/create');
-              print('yes-tap');
-              updateData(context, index, property);
-              Navigator.pop(context);
-              Utils.showBottomSheet(context);
-              await new Future.delayed(const Duration(seconds: 2));
-              Navigator.pop(context);
-              await Utils.startHapticSuccess();
-              await new Future.delayed(const Duration(seconds: 1));
-              Navigator.pop(context);
-            },
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24.0),
+  void _confirmRemoveInterest(BuildContext context, int index, Property property){
+
+    showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),
+        ),
+        builder: (context) {
+          return Container(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  SizedBox(
+                    height: 16.0,
+                  ),
+
+                  Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: Text('លុបការប្រាក់សម្រាប់ខែទី ${index + 1} ចោល?',)
+                  ),
+                  SizedBox(height: 10.0),
+                  _buttonDeleteInterest(context, index, property),
+                  SizedBox(height: 10.0),
+
+                ],
+              ),
             ),
-            color: Colors.blue,
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Hero(child: new Icon(
-                  Icons.donut_large,
-                  color: Colors.white,
-                  size: 24.0,
-                ), tag: 'hero_2',
-                ),
-                SizedBox(
-                  width: 16.0,
-                ),
-                new Text(
-                  ' Click Here to Update Data' ,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            )));
-  }
-
-  Widget _buttonDeleteInterest( BuildContext context,int index, Property property){
-    return new Center(
-        child: new RaisedButton(
-            onPressed: () async {
-              // Navigator.pushNamed(context, '/create');
-              updateRemoveInterest(context, index, property);
-              Navigator.pop(context);
-              Utils.showBottomSheet(context);
-              await new Future.delayed(const Duration(seconds: 2));
-              Navigator.pop(context);
-              await Utils.startHapticSuccess();
-              await new Future.delayed(const Duration(seconds: 1));
-              Navigator.pop(context);
-            },
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24.0),
-            ),
-            color: Colors.grey,
-            child: new Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Hero(child: new Icon(
-                  Icons.delete_sweep,
-                  color: Colors.white,
-                  size: 24.0,
-                ), tag: 'hero_2',
-                ),
-                SizedBox(
-                  width: 16.0,
-                ),
-                new Text(
-                  ' ចុចដើម្បីលុបការប្រាក់ចោល' ,
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold),
-                ),
-              ],
-            )));
-  }
-
-  void updateData(BuildContext context, int index, Property property){
-    String interest = _controllers[index].text;
-    print('=> interst $interest');
-    if(interest.isEmpty) return;
-    if(property.listTrack.containsKey('month$index')){
-      property.listTrack['month$index'] =  double.parse(interest);
-
-      var productProvider = Provider.of<CRUDModel>(context);
-      print('user id ${property.userId}');
-      productProvider.updateProperty(property, property.userId, property.id);
-    }else {
-      property.listTrack['month$index'] =  double.parse(interest);
-      var productProvider = Provider.of<CRUDModel>(context);
-      print('user id ${property.userId}');
-      productProvider.updateProperty(property, property.userId, property.id);
-
-    }
-
-  }
-  void updateDoneBid(BuildContext context, Property property){
-    var productProvider = Provider.of<CRUDModel>(context);
-
-    property.isDead = !property.isDead;
-    print('user id ${property.userId}');
-    productProvider.updateProperty(property, property.userId, property.id);
-  }
-  void updateRemoveInterest(BuildContext context, int index, Property property){
-
-    if( property.listTrack.containsKey('month$index')){
-      property.listTrack.remove('month$index');
-      var productProvider = Provider.of<CRUDModel>(context);
-      print('user id ${property.userId}');
-      productProvider.updateProperty(property, property.userId, property.id);
-    }
-
+          );
+        });
   }
 }

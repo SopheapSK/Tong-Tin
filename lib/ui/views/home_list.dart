@@ -8,6 +8,7 @@ import 'package:TonTin/ui/views/home_detail_list.dart';
 import 'package:TonTin/ui/views/tong_tin_detail_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
@@ -27,7 +28,7 @@ class _ListPageState extends State<ListPage> {
   bool isProfileActive = false;
   @override
   void initState() {
-
+    SystemChannels.textInput.invokeMethod('TextInput.hide');
     super.initState();
   }
 
