@@ -1,7 +1,9 @@
 import 'package:TonTin/home_page.dart';
-import 'package:TonTin/login_page.dart';
+
 import 'package:TonTin/pages/list_notification_report.dart';
+import 'package:TonTin/pages/login_page_fire.dart';
 import 'package:TonTin/pages/main_page.dart';
+import 'package:TonTin/pages/register_page_fire.dart';
 import 'package:TonTin/ui/views/add_properties.dart';
 import 'package:TonTin/ui/views/home_list.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +30,10 @@ class Router {
         return MaterialPageRoute(
             builder: (_)=>  LoginPage()
         ) ;
+      case '/register' :
+        return MaterialPageRoute(
+            builder: (_)=>  RegisterPage()
+        ) ;
       case '/home' :
         return MaterialPageRoute(
             builder: (_)=>  DrawerSlideWithHeader()
@@ -44,6 +50,7 @@ class Router {
         return MaterialPageRoute(
             builder: (_)=>  CreateProperty()
         ) ;
+
         //CreateProperty
       default:
         return MaterialPageRoute(

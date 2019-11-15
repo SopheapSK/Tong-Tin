@@ -51,6 +51,9 @@ class Api {
   Future<DocumentReference> addProperty(Map data, String userID) {
     return ref.firestore.collection(PROPERTY+userID).add(data);
   }
+  Future<DocumentReference> addNewUser(Map data) {
+    return ref.firestore.collection(MEMBERS).add(data);
+  }
 
   Future<void> updateDocument(Map data, String id) {
     return ref.document(id).updateData(data);

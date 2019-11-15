@@ -4,6 +4,7 @@ import 'package:TonTin/core/models/productModel.dart';
 import 'package:TonTin/core/services/api.dart';
 import 'package:TonTin/core/viewmodels/CRUDModel.dart';
 import 'package:TonTin/model/lesson_model.dart';
+import 'package:TonTin/pages/login_page_fire.dart';
 import 'package:TonTin/ui/views/home_detail_list.dart';
 import 'package:TonTin/ui/views/tong_tin_detail_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -113,6 +114,12 @@ class _ListPageState extends State<ListPage> {
                   isHomeActive = !isHomeActive;
 
                 });
+
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => LoginPage()));
+
               },
             )
           ],
