@@ -1,13 +1,19 @@
 import 'dart:convert' as JSON;
 
+import 'package:TonTin/core/models/productModel.dart';
+import 'package:TonTin/core/viewmodels/CRUDModel.dart';
 import 'package:TonTin/item/account.dart';
 import 'package:TonTin/item/login_token.dart';
+import 'package:TonTin/ui/views/home_list.dart';
 import 'package:TonTin/util/AESImpl.dart';
 import 'package:TonTin/util/NetworkService.dart';
 import 'package:TonTin/util/constant.dart';
 import 'package:TonTin/util/share_pref.dart';
 import 'package:TonTin/util/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibrate/vibrate.dart';
 
@@ -19,7 +25,8 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
+  String userID = "";
+  bool isLocalAuth = false;
   final userNameController = TextEditingController();
   final passwordController = TextEditingController();
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -34,6 +41,35 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+    if(mounted){
+      _prefs.then((f){
+        userID =  f.getString(PrefUtil.KEY_USER_ID);
+        isLocalAuth = f.getBool(PrefUtil.KEY_LOCAL_AUTH);
+        if(userID == null || isLocalAuth == null) return;
+
+
+        if(userID.isNotEmpty && isLocalAuth){
+
+          var auth =   localAuth();
+          auth.then((res){
+            if(res){
+              // it has user id and finger print, let go main page
+             /* Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>ListPage(title : 'Persona ', userID: userID,)));*/
+              //Navigator.of(context).pushReplacementNamed( '/home_tong_tin');
+              Navigator
+                  .of(context)
+                  .pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => ListPage(title : 'Persona ', userID: userID,)));
+            }
+
+          });
+
+        }
+
+      });
+    }
 
   }
   bool submitting = false;
@@ -50,14 +86,14 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
 
-
+    var userProvider = Provider.of<CRUDModel>(context);
 
     final logo = Hero(
       tag: 'hero_4',
       child: CircleAvatar(
         backgroundColor: Colors.transparent,
         radius: 48.0,
-        child: Image.asset('assets/logo.png'),
+        child: Icon(Icons.wifi_tethering, size: 90.0, color: Colors.blueAccent,),
       ),
     );
 
@@ -78,6 +114,7 @@ class _LoginPageState extends State<LoginPage> {
       autofocus: false,
       keyboardType: TextInputType.number,
       obscureText: true,
+        maxLength: 4,
       decoration: InputDecoration(
         hintText: 'Password',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
@@ -99,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () {
-          toggleSubmitState();
+          validateData(userProvider);
 
         },
 
@@ -145,7 +182,59 @@ class _LoginPageState extends State<LoginPage> {
   }
 
 
+  Future<bool> localAuth() async {
+    var localAuth = LocalAuthentication();
+    bool didAuthenticate =
+    await localAuth.authenticateWithBiometrics(
+      localizedReason: 'Authenticate for Next Login',stickyAuth: true,useErrorDialogs: true,);
+    return didAuthenticate;
+  }
 
+  Future validateData(CRUDModel userProvider) async {
+
+
+    var pw = passwordController.text.trim();
+
+    var phone = userNameController.text.trim();
+
+    if( pw.isEmpty || phone.isEmpty ){
+      Utils.showToast(context, "Please Fill All Infomation");
+      return;
+    }
+
+    setState(() {
+      submitting = true;
+    });
+
+      var userID =  userProvider.getUserID(phone, pw);
+      userID.then((f){
+        setState(() {
+          submitting = false;
+        });
+        if(f.id == null){
+          Utils.showToast(context, "Please Check Your Phone Number and Password Again");
+          return;
+        }
+        _prefs.then((SharedPreferences prefs){
+          prefs.setString(PrefUtil.KEY_USER_ID, f.id);
+          prefs.setBool(PrefUtil.KEY_LOCAL_AUTH, f.fingerPrint);
+         /* Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>ListPage(title : 'Persona ', userID: f.id,)));*/
+          Navigator
+              .of(context)
+              .pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => ListPage(title : 'Persona ', userID: f.id,)));
+        });
+
+      }, onError: (f){
+        setState(() {
+          submitting = false;
+        });
+        Utils.showToast(context, "There is an Error, Please Try Again");
+      });
+
+  }
 
 
 

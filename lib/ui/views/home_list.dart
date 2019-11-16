@@ -7,16 +7,20 @@ import 'package:TonTin/model/lesson_model.dart';
 import 'package:TonTin/pages/login_page_fire.dart';
 import 'package:TonTin/ui/views/home_detail_list.dart';
 import 'package:TonTin/ui/views/tong_tin_detail_page.dart';
+import 'package:TonTin/ui/widgets/profile_page.dart';
+import 'package:TonTin/util/share_pref.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ListPage extends StatefulWidget {
-  ListPage({Key key, this.title}) : super(key: key);
+  ListPage({Key key, this.title, this.userID}) : super(key: key);
 
   final String title;
+  final String userID;
 
   @override
   _ListPageState createState() => _ListPageState();
@@ -24,13 +28,14 @@ class ListPage extends StatefulWidget {
 
 class _ListPageState extends State<ListPage> {
   List<DocumentSnapshot> _snapshot;
-  final USER_ID = "xm0RJnDMeW6ggADBFKDY";
+
   bool isHomeActive = true;
   bool isProfileActive = false;
   @override
   void initState() {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     super.initState();
+
   }
 
   @override
@@ -39,12 +44,12 @@ class _ListPageState extends State<ListPage> {
 
     final makeBody = Container(
         child: StreamBuilder(
-            stream: productProvider.fetchAllProperties(USER_ID),
+            stream: productProvider.fetchAllProperties(widget.userID== null ? '1' : widget.userID),
             builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasData) {
                 _snapshot = snapshot.data.documents;
 
-                return _buildList(context, _snapshot);
+                return _buildList(context, _snapshot, widget.userID);
               } else {
                 return Text('fetching', style: TextStyle(color: Colors.white),);
               }
@@ -114,7 +119,7 @@ class _ListPageState extends State<ListPage> {
                   isHomeActive = !isHomeActive;
 
                 });
-
+                if(true) return;
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -127,6 +132,7 @@ class _ListPageState extends State<ListPage> {
       ),
     );
     final topAppBar = AppBar(
+      automaticallyImplyLeading: false,
       elevation: 0.1,
       backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
       title: Text(
@@ -138,7 +144,7 @@ class _ListPageState extends State<ListPage> {
         IconButton(
           icon: Icon(
             Icons.list,
-            color: Colors.white,
+            color: Colors.transparent,
           ),
           onPressed: () {},
         )
@@ -155,42 +161,57 @@ class _ListPageState extends State<ListPage> {
     return Scaffold(
       backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
       appBar: topAppBar,
-      body: Column(
+
+      body:isHomeActive ? Column(
         children: <Widget>[
-          Expanded(child: makeBody),
+          Expanded(child: widget.userID == null ? prompt : makeBody),
           makeNewItem
         ],
-      ),
+      ): Profile(),
       bottomNavigationBar: makeBottom,
     );
   }
 }
 
 
-
-Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot) {
+Widget promptNoItem() {
+  return Padding(
+    padding: const EdgeInsets.only(top:50.0),
+    child: Center(
+      child: Text(
+        'No List of Property yet \nLet create New one by \nTap on CREATE NEW ITEM',
+        style: TextStyle(
+            color: Colors.white, fontSize: 16.0, fontWeight: FontWeight.bold),
+      ),
+    ),
+  );
+}
+Widget _buildList(BuildContext context, List<DocumentSnapshot> snapshot, String userID) {
 
   List<Property> list = new List();
   snapshot.forEach((f){
     list.add(Property.fromMap(f.data, f.documentID));
   });
+  if(list.length <= 0){
+    return ListView( padding: const EdgeInsets.only(top: 10.0), children: <Widget>[promptNoItem()],);
+  }
 
   return ListView(
       padding: const EdgeInsets.only(top: 10.0),
-      children:list.map((data) => makeCard(context, data)).toList());
+      children:list.map((data) => makeCard(context, data, userID)).toList());
 }
 
-Widget makeCard(BuildContext context, Property data) => Card(
+Widget makeCard(BuildContext context, Property data, String userID) => Card(
 
       elevation: 0.0,
       margin: new EdgeInsets.symmetric(horizontal: 10.0, vertical: 6.0),
       child: Container(
         decoration: BoxDecoration(color: Color.fromRGBO(64, 75, 96, .9)),
-        child: makeListTile(context, data),
+        child: makeListTile(context, data, userID),
       ),
     );
 
-ListTile makeListTile(BuildContext context, Property property) {
+ListTile makeListTile(BuildContext context, Property property, String userID) {
 
    return ListTile(
     contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
@@ -223,7 +244,7 @@ ListTile makeListTile(BuildContext context, Property property) {
           child: Padding(
               padding: EdgeInsets.only(left: 10.0),
               child:
-              Text(' ១ក្បាល​: \$${property.amount.toStringAsFixed(2)} \n ដេញហើយ${property.listTrack.length.toString()}/${property.people} នាក់. \n ការខែមុន:\$${property.amount * property.interest}',
+              Text(' ១ក្បាល​: \$${property.amount.toStringAsFixed(2)} \n ដេញហើយ${property.listTrack.length.toString()}/${property.people} នាក់.',
                   style: TextStyle(color: Colors.white))),
         )
       ],
@@ -233,7 +254,7 @@ ListTile makeListTile(BuildContext context, Property property) {
         child: Icon(Icons.keyboard_arrow_right,
             color: Colors.white, size: 16.0)),
     onTap: () {
-      property.userId = 'xm0RJnDMeW6ggADBFKDY';
+      property.userId = userID;
       Navigator.push(
           context,
           MaterialPageRoute(

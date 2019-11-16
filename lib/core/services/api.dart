@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Api {
   static final String USERS = 'users';
   final String PROPERTY = 'properties/props/';
+  final String PROPS = 'properties/props';
   final String MEMBERS = 'properties/users/members';
   final String USER_MEMBERS = 'users/members';
   final Firestore _db = Firestore.instance;
@@ -44,6 +45,9 @@ class Api {
   Future<void> removeDocument(String id) {
     return ref.document(id).delete();
   }
+  Future<void> removeTongTin(String id,String userID) {
+    return ref.firestore.collection(PROPERTY + userID ).document(id).delete();
+  }
 
   Future<DocumentReference> addDocument(Map data) {
     return ref.add(data);
@@ -60,6 +64,10 @@ class Api {
   }
   Future<void> updateDocumentProperty(Map data, String userID, String id) {
     return ref.firestore.collection(PROPERTY + userID).document(id).updateData(data);
+  }
+
+  Future<QuerySnapshot> getUserID(String phone) {
+    return ref.firestore.collection(MEMBERS).where("phone", isEqualTo: phone).getDocuments();
   }
 
 }

@@ -15,4 +15,7 @@ class PrefUtil{
   static   final String ACCOUNT_INFO = "account_info";
   static   final String NEW_KEY_P = "pwen";
   static   final String ITEM_COUNT_KEY = "item_count";
+  static   final String KEY_LOCAL_AUTH = "local_auth";
+  static   final String KEY_USER_ID = "user_id_fb";
+  static   final String KEY_HAS_ACC = "has_acc";
 }

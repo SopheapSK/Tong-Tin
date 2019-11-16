@@ -4,6 +4,7 @@ import 'package:TonTin/core/models/productModel.dart';
 import 'package:TonTin/core/viewmodels/CRUDModel.dart';
 import 'package:TonTin/item/account.dart';
 import 'package:TonTin/item/login_token.dart';
+import 'package:TonTin/ui/views/home_list.dart';
 import 'package:TonTin/util/AESImpl.dart';
 import 'package:TonTin/util/NetworkService.dart';
 import 'package:TonTin/util/constant.dart';
@@ -11,6 +12,8 @@ import 'package:TonTin/util/share_pref.dart';
 import 'package:TonTin/util/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:local_auth/auth_strings.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibrate/vibrate.dart';
@@ -64,7 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
       child: CircleAvatar(
         backgroundColor: Colors.transparent,
         radius: 48.0,
-        child: Image.asset('assets/logo.png'),
+        child: Icon(Icons.wifi_tethering, size: 90.0, color: Colors.blueAccent,),
       ),
     );
 
@@ -84,6 +87,7 @@ class _RegisterPageState extends State<RegisterPage> {
       controller: passwordController,
       autofocus: false,
       keyboardType: TextInputType.number,
+      maxLength: 4,
       obscureText: true,
       decoration: InputDecoration(
         hintText: 'Password',
@@ -94,6 +98,7 @@ class _RegisterPageState extends State<RegisterPage> {
     final passwordConfirm = TextFormField(
       controller: passwordConfirmController,
       autofocus: false,
+      maxLength: 4,
       keyboardType: TextInputType.number,
       obscureText: true,
       decoration: InputDecoration(
@@ -128,8 +133,6 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
 
-
-
     return new Scaffold(
       backgroundColor: Colors.white,
       body:   new Center(
@@ -154,30 +157,72 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  Future<bool> localAuth() async {
+    var localAuth = LocalAuthentication();
+    bool didAuthenticate =
+        await localAuth.authenticateWithBiometrics(
+      localizedReason: 'Authenticate for Next Login',stickyAuth: true,useErrorDialogs: true,);
+    return didAuthenticate;
+  }
 
-  void validateData(CRUDModel userProvider){
+  Future validateData(CRUDModel userProvider) async {
 
-    if(passwordConfirmController.text.isEmpty || passwordController.text.isEmpty || userNameController.text.isEmpty){
+
+
+
+    var pw = passwordController.text.trim();
+    var conPW = passwordConfirmController.text.trim();
+    var phone = userNameController.text.trim();
+
+    if( pw.isEmpty ||   conPW.isEmpty || phone.isEmpty ){
       Utils.showToast(context, "Please Fill All Infomation");
       return;
     }
+    if(pw != conPW){
+      Utils.showToast(context, "Password and Confirm Password does not match");
+      return;
+    }
+    var addLocalAuth = await localAuth();
 
-    Users data = new Users(password: passwordController.text, phone: userNameController.text, createOn:  new DateTime.now().millisecondsSinceEpoch);
-    setState(() {
-      submitting = true;
-    });
-    var result =  userProvider.addUser(data);
-    result.then((res){
+      var data = new Users(password: pw, phone: phone, createOn:  new DateTime.now().millisecondsSinceEpoch, fingerPrint:  addLocalAuth);
+      setState(() {
+        submitting = true;
+      });
+      var resultUser =  userProvider.addUser(data);
+      resultUser.then((res){
 
-      setState(() {
-        submitting = false;
+        var userID =  userProvider.getUserID(phone, pw);
+        userID.then((f){
+          setState(() {
+            submitting = false;
+          });
+          if(f.id == null){
+            Utils.showToast(context, "There is an Error, Please Try Again");
+            return;
+          }
+
+          _prefs.then((SharedPreferences prefs){
+            prefs.setBool(PrefUtil.KEY_LOCAL_AUTH, addLocalAuth);
+            prefs.setString(PrefUtil.KEY_USER_ID, f.id);
+            prefs.setBool(PrefUtil.KEY_HAS_ACC, true);
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>ListPage(title : 'Persona ', userID: f.id,)));
+          });
+
+      }, onError: (f){
+        setState(() {
+          submitting = false;
+        });
+        Utils.showToast(context, "There is an Error, Please Try Again");
       });
-    }, onError: (f){
-      setState(() {
-        submitting = false;
-      });
-      Utils.showToast(context, "There is an Error, Please Try Again");
+
+
+
     });
+
+
 
   }
 

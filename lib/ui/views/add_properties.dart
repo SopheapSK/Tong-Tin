@@ -2,12 +2,6 @@ import 'dart:convert' as JSON;
 
 import 'package:TonTin/core/models/productModel.dart';
 import 'package:TonTin/core/viewmodels/CRUDModel.dart';
-import 'package:TonTin/item/account.dart';
-import 'package:TonTin/item/login_token.dart';
-import 'package:TonTin/util/AESImpl.dart';
-import 'package:TonTin/util/NetworkService.dart';
-import 'package:TonTin/util/constant.dart';
-import 'package:TonTin/util/share_pref.dart';
 import 'package:TonTin/util/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -26,17 +20,12 @@ class CreateProperty extends StatefulWidget {
 class _CreatePropertyState extends State<CreateProperty> {
   final USER_ID = "xm0RJnDMeW6ggADBFKDY";
   final df = new DateFormat('dd-MM-yyyy');
-
-  String _title, _price, _interest;
-
-
+  String _currentDateTime =  '';
 
   final tTitleController = TextEditingController();
   final tPriceController = TextEditingController();
   final tTotalPeopleController = TextEditingController();
 
-
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   final _formKey = GlobalKey<FormState>();
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isAutoValidate = false;
@@ -52,7 +41,11 @@ class _CreatePropertyState extends State<CreateProperty> {
   @override
   void initState() {
     super.initState();
-
+    if(mounted){
+    setState(() {
+      _currentDateTime  =  df.format(new DateTime.now());
+    });
+  }
   }
   bool submitting = false;
 
@@ -64,7 +57,7 @@ class _CreatePropertyState extends State<CreateProperty> {
 
   @override
   Widget build(BuildContext context) {
-    String _currentDateTime =  df.format(new DateTime.now());
+
     var propertyProvider = Provider.of<CRUDModel>(context);
 
     final topContent = InkWell(
@@ -156,6 +149,7 @@ class _CreatePropertyState extends State<CreateProperty> {
                 print('confirm $date');
                 setState(() {
                   _currentDateTime = df.format(date);
+                  print('confirm F $_currentDateTime');
                 });
               }, currentTime: DateTime.now(), locale: LocaleType.en);
         },
@@ -220,7 +214,7 @@ class _CreatePropertyState extends State<CreateProperty> {
                       // If the form is valid, display a Snackbar.
                       //showSnakeBar(context);
                       Utils.showBottomSheet(context);
-                      _startSubmitData(propertyProvider, _currentDateTime);
+                      _startSubmitData(propertyProvider);
                     }
 
                   },
@@ -299,11 +293,9 @@ class _CreatePropertyState extends State<CreateProperty> {
     }
   }
 
-  Future _startSubmitData( CRUDModel provider, String date) async {
+  Future _startSubmitData( CRUDModel provider) async {
 
-
-
-    var startDate = new DateFormat('dd-MM-yyyy').parse(date).millisecondsSinceEpoch;
+    var startDate = new DateFormat('dd-MM-yyyy').parse(_currentDateTime).millisecondsSinceEpoch;
     var createDate = DateTime.now().millisecondsSinceEpoch;
     Property property = new Property(people: int.parse(tTotalPeopleController.text),
         title: tTitleController.text, startOn: startDate, createOn: createDate, amount: double.parse(tPriceController.text));

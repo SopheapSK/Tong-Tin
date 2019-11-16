@@ -79,9 +79,9 @@ class Users {
   String phone;
   String password;
   int createOn;
+  bool fingerPrint;
 
-
-  Users({this.id, this.name, this.phone, this.password,  this.createOn});
+  Users({this.id, this.name, this.phone, this.password,  this.createOn, this.fingerPrint});
 
   Users.fromMap(Map snapshot, String id)
       :
@@ -89,14 +89,17 @@ class Users {
         name = snapshot['name'] ?? '',
         phone = snapshot['phone'] ?? '',
         password = snapshot['password'] ?? '',
-        createOn = snapshot['createOn'] ?? 0;
+        createOn = snapshot['createOn'] ?? 0,
+        fingerPrint = snapshot['fingerPrint'] ?? false;
+
 
   toJson() {
     return {
       "name": name,
       "phone": phone,
       "password": password,
-      "createOn" : createOn
+      "createOn" : createOn,
+      "fingerPrint" : fingerPrint
     };
   }
 }

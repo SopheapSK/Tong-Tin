@@ -29,6 +29,7 @@ class CRUDModel extends ChangeNotifier {
     return _api.streamMembersCollection();
   }
   Stream<QuerySnapshot> fetchAllProperties(String userID) {
+  print('how $userID');
     return _api.streamPropertiesCollection(userID);
   }
 
@@ -46,6 +47,11 @@ class CRUDModel extends ChangeNotifier {
      await _api.removeDocument(id) ;
      return ;
   }
+  Future removeTongTingByID(String id, String userID) async{
+    print('id-> $id');
+    await _api.removeTongTin(id, userID) ;
+    return ;
+  }
   Future updateProduct(Product data,String id) async{
     await _api.updateDocument(data.toJson(), id) ;
     return ;
@@ -60,12 +66,6 @@ class CRUDModel extends ChangeNotifier {
     var result  = await _api.addDocument(data.toJson()) ;
 
     return ;
-
-  }
-
-
-  Future addUser(Users data) async{
-    return await _api.addNewUser(data.toJson()) ;
 
   }
 
@@ -90,9 +90,30 @@ class CRUDModel extends ChangeNotifier {
   }
 
 
+
+  // user part
+  Future addUser(Users data) async{
+    return await _api.addNewUser(data.toJson()) ;
+
+  }
   Future<List<Users>> fetchUsers() async {
    // var result = await _api.getDataCollection();
     return null;
+  }
+
+  Future<Users> getUserID(String phone, String pw) async {
+    var result = await _api.getUserID(phone);
+    users = result.documents
+        .map((doc) => Users.fromMap(doc.data, doc.documentID))
+        .toList();
+
+    for(var f in users){
+      if(f.phone == phone && f.password == pw){
+        return f;
+      }
+    }
+    return new Users();
+
   }
 
 

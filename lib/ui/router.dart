@@ -16,7 +16,11 @@ class Router {
     switch (settings.name) {
       case '/' :
         return  MaterialPageRoute(
-          builder: (_)=>  ListPage(title: ' Personal ')
+          builder: (_)=>  LoginPage()
+        );
+      case '/home_tong_tin' :
+        return  MaterialPageRoute(
+            builder: (_)=>  ListPage(title: ' Personal ', userID: null,)
         );
       case '/addProduct' :
         return MaterialPageRoute(

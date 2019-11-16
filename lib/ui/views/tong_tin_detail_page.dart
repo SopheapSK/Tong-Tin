@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../util/utils.dart';
+import 'home_list.dart';
 
 class DetailTongTinPage extends StatefulWidget {
   final Property property;
@@ -36,7 +37,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
   }
   @override
   Widget build(BuildContext context) {
-
+    var provider = Provider.of<CRUDModel>(context);
 
     final topContentText = Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -70,7 +71,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
         margin: EdgeInsets.all(16.0),
         child: InkWell(
           onTap: () {
-            _confirmDoneBid(context, 1, insideProperty);
+            _confirmDoneBid(context, 1, insideProperty, provider);
            // Navigator.pop(context);
           },
           child: Icon(Icons.cloud_done, color: Colors.white),
@@ -80,7 +81,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
         margin: EdgeInsets.all(16.0),
         child: InkWell(
           onTap: () {
-            _confirmDelete(context, 1, widget.property);
+            _confirmDelete(context, 1, widget.property, provider);
           },
           child: Icon(Icons.delete_forever, color: Colors.white),
         ),
@@ -100,7 +101,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
             topContent,
             topContentText,
             headerInfo(context, insideProperty),
-            Expanded(child: _buildList(context, insideProperty))
+            Expanded(child: _buildList(context, insideProperty, provider))
           ],
         ),
       ),
@@ -210,7 +211,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
     );
   }
 
-  Widget _buildList(BuildContext context, Property snapshot) {
+  Widget _buildList(BuildContext context, Property snapshot, CRUDModel provider) {
     List<String> list = new List();
     for (var i = 0; i < snapshot.people; i++) {
       list.add('${i + 1}');
@@ -224,19 +225,19 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
         itemCount: list.length,
         itemBuilder: (BuildContext context, int index) {
           var isCurrentMonth = Utils.isDateMatch(Utils.addMonth(snapshot.startOn, index));
-          return makeListItem(context, index, list[index], snapshot, isCurrentMonth);
+          return makeListItem(context, index, list[index], snapshot, isCurrentMonth, provider);
         },
       ),
     );
   }
 
-  Widget makeListItem(BuildContext context, int index, String info, Property snapshot, bool isCurrentMonth) {
+  Widget makeListItem(BuildContext context, int index, String info, Property snapshot, bool isCurrentMonth, CRUDModel provider) {
     return Container(
-        color: isCurrentMonth ? Colors.orangeAccent : index % 2 == 0 ? Colors.blueGrey : Color.fromRGBO(58, 66, 86, .2) ,
-        child: makeListTile(context,index,  info, snapshot));
+        color: isCurrentMonth ? Color.fromRGBO(58, 66, 86, 1) : index % 2 == 0 ? Colors.blueGrey : Color.fromRGBO(58, 66, 86, .2) ,
+        child: makeListTile(context,index,  info, snapshot, provider));
   }
 
-  ListTile makeListTile(BuildContext context, int index, String info, Property property) {
+  ListTile makeListTile(BuildContext context, int index, String info, Property property, CRUDModel provider) {
     var isInterestAvailable = property.listTrack.containsKey('month$index');
     var interest = isInterestAvailable ? property.listTrack['month$index']??0.00.toStringAsFixed(2) : ' N/A';
     var amountToPay = isInterestAvailable ? (property.amount - ( property.listTrack['month$index']??0.0)).toStringAsFixed(2) : ' N/A';
@@ -258,7 +259,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
         child: Text('$info', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
       ),
       title: Text(
-        '${Utils.addMonth(property.startOn, index)}',
+        'ខែ ${Utils.addMonth(property.startOn, index).substring(3)}',
         style: TextStyle(color: Colors.lightBlue, fontSize: 12.0, fontWeight: FontWeight.normal),
       ),
       // subtitle: Text("Intermediate", style: TextStyle(color: Colors.white)),
@@ -276,12 +277,12 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
         ],
       ),
       trailing: GestureDetector(
-          onTap: ()=> _showBottomSheet(context, index, property)
+          onTap: ()=> _showBottomSheet(context, index, property, provider)
           , child: Icon(Icons.edit, color: Colors.white, size: 20.0)),
 
       onLongPress: () {
        // print('tap for more');
-        _confirmRemoveInterest(context, index, property);
+        _confirmRemoveInterest(context, index, property, provider);
 
       },
     );
@@ -289,7 +290,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
 
   }
 
-  void _showBottomSheet(BuildContext context, int index, Property property){
+  void _showBottomSheet(BuildContext context, int index, Property property, CRUDModel provider){
 
     showModalBottomSheet(
         context: context,
@@ -339,7 +340,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
                     SizedBox(
                       height: 4.0,
                     ),
-                    _buttonSubmit(context,index, property),
+                    _buttonSubmit(context,index, property, provider),
 
 
                     SizedBox(height: 32),
@@ -352,12 +353,12 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
           );
         });
   }
-  Widget _buttonBid( BuildContext context, Property property){
+  Widget _buttonBid( BuildContext context, Property property, CRUDModel provider){
     return new Center(
         child: new RaisedButton(
             onPressed: () async {
               // Navigator.pushNamed(context, '/create');
-              updateDoneBid(context, property);
+              updateDoneBid(provider, property);
               Navigator.pop(context);
             },
             shape: RoundedRectangleBorder(
@@ -386,11 +387,11 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
               ],
             )));
   }
-  Widget _buttonSubmit( BuildContext context,int index, Property property){
+  Widget _buttonSubmit( BuildContext context,int index, Property property, CRUDModel provider){
     return new Center(
         child: new RaisedButton(
             onPressed: () async {
-              updateData(context, index, property);
+              updateData(provider, index, property);
               Navigator.pop(context);
             },
             shape: RoundedRectangleBorder(
@@ -420,12 +421,12 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
             )));
   }
 
-  Widget _buttonDeleteInterest( BuildContext context,int index, Property property){
+  Widget _buttonDeleteInterest( BuildContext context,int index, Property property, CRUDModel provider){
     return new Center(
         child: new RaisedButton(
             onPressed: () async {
               // Navigator.pushNamed(context, '/create');
-              updateRemoveInterest(context, index, property);
+              updateRemoveInterest(provider, index, property);
               Navigator.pop(context);
 
             },
@@ -455,11 +456,11 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
               ],
             )));
   }
-  Widget _buttonDeleteTongTin( BuildContext context,int index, Property property){
+  Widget _buttonDeleteTongTin( BuildContext context,int index, Property property, CRUDModel provider){
     return new Center(
         child: new RaisedButton(
             onPressed: () async {
-              deleteThisTongTin(property);
+              deleteThisTongTin(property, provider);
               Navigator.pop(context);
 
             },
@@ -491,27 +492,30 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
   }
 
 
-  void deleteThisTongTin(Property property){
-    //property.title = "la la la ";
-    setState(() {
-      insideProperty = property;
+  void deleteThisTongTin(Property property, CRUDModel provider){
+    print('start Delete');
+    var me =  provider.removeTongTingByID(property.id, property.userId);
+    me.then((f){
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>ListPage(title : 'Persona ', userID: property.userId,)));
     });
 
   }
 
-  void updateData(BuildContext context, int index, Property property){
+  void updateData(CRUDModel productProvider, int index, Property property){
     String interest = _controllers[index].text;
     print('=> interst $interest');
     if(interest.isEmpty) return;
     if(property.listTrack.containsKey('month$index')){
       property.listTrack['month$index'] =  double.parse(interest);
 
-      var productProvider = Provider.of<CRUDModel>(context);
+
       print('user id ${property.userId}');
       productProvider.updateProperty(property, property.userId, property.id);
     }else {
       property.listTrack['month$index'] =  double.parse(interest);
-      var productProvider = Provider.of<CRUDModel>(context);
       print('user id ${property.userId}');
       productProvider.updateProperty(property, property.userId, property.id);
 
@@ -521,9 +525,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
     });
 
   }
-  void updateDoneBid(BuildContext context, Property property){
-    var productProvider = Provider.of<CRUDModel>(context);
-
+  void updateDoneBid(CRUDModel productProvider, Property property){
     property.isDead = !property.isDead;
     print('user id ${property.userId}');
     productProvider.updateProperty(property, property.userId, property.id);
@@ -531,11 +533,10 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
       insideProperty = property;
     });
   }
-  void updateRemoveInterest(BuildContext context, int index, Property property){
+  void updateRemoveInterest(CRUDModel productProvider, int index, Property property){
 
     if( property.listTrack.containsKey('month$index')){
       property.listTrack.remove('month$index');
-      var productProvider = Provider.of<CRUDModel>(context);
       print('user id ${property.userId}');
       productProvider.updateProperty(property, property.userId, property.id);
       setState(() {
@@ -545,7 +546,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
 
   }
 
-  void _confirmDelete(BuildContext context, int index, Property property){
+  void _confirmDelete(BuildContext context, int index, Property property, CRUDModel provider){
 
     showModalBottomSheet(
         context: context,
@@ -571,7 +572,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
 
                   ),
                   SizedBox(height: 10),
-                  _buttonDeleteTongTin(context, index, property),
+                  _buttonDeleteTongTin(context, index, property, provider),
                   SizedBox(height: 10),
 
                 ],
@@ -580,7 +581,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
           );
         });
   }
-  void _confirmDoneBid(BuildContext context, int index, Property property){
+  void _confirmDoneBid(BuildContext context, int index, Property property, CRUDModel provider){
 
     showModalBottomSheet(
         context: context,
@@ -602,11 +603,11 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
                   ),
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text('បើអ្នកដេញរួចហើយ សុមចុចប៊ូតុងយល់ប្រមខាងក្រមនេះ',)
+                      child: Text('បើអ្នកដេញរួចហើយ សុមចុចប៊ូតុង យល់ព្រម ខាងក្រមនេះ',)
 
                   ),
                   SizedBox(height: 10.0),
-                  _buttonBid(context, property),
+                  _buttonBid(context, property, provider),
                   SizedBox(height: 10.0),
 
                 ],
@@ -615,7 +616,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
           );
         });
   }
-  void _confirmRemoveInterest(BuildContext context, int index, Property property){
+  void _confirmRemoveInterest(BuildContext context, int index, Property property, CRUDModel provider){
 
     showModalBottomSheet(
         context: context,
@@ -641,7 +642,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
                       child: Text('លុបការប្រាក់សម្រាប់ខែទី ${index + 1} ចោល?',)
                   ),
                   SizedBox(height: 10.0),
-                  _buttonDeleteInterest(context, index, property),
+                  _buttonDeleteInterest(context, index, property, provider),
                   SizedBox(height: 10.0),
 
                 ],
