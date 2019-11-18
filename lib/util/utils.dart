@@ -121,6 +121,13 @@ class Utils {
         });
   }
 
+  static  Future startHapticNormal() async {
+    var canVibrate = await Vibrate.canVibrate;
+    if(canVibrate) {
+      var _type = FeedbackType.light;
+      Vibrate.feedback(_type);
+    }
+  }
   static  Future startHapticSuccess() async {
     var canVibrate = await Vibrate.canVibrate;
     if(canVibrate) {

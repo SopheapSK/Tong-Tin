@@ -20,6 +20,15 @@ class CRUDModel extends ChangeNotifier {
         .toList();
     return products;
   }
+  Future<List<Property>> getAllProperties(String userID) async {
+    var result = await _api.getPropertyCollection(userID);
+    var props = result.documents
+        .map((doc) => Property.fromMap(doc.data, doc.documentID))
+        .toList();
+
+
+    return props;
+  }
 
   Stream<QuerySnapshot> fetchProductsAsStream() {
     return _api.streamDataCollection();

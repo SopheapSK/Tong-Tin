@@ -19,6 +19,9 @@ class Api {
   Future<QuerySnapshot> getDataCollection() {
     return ref.getDocuments();
   }
+  Future<QuerySnapshot> getPropertyCollection(String userID) {
+    return ref.firestore.collection(PROPERTY + userID).orderBy('createOn', descending: true).getDocuments();
+  }
 
   Future<QuerySnapshot> getUsersCollection() {
     return ref.getDocuments();

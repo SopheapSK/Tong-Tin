@@ -17,6 +17,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibrate/vibrate.dart';
 
+import 'home_new.dart';
+
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
@@ -61,7 +63,7 @@ class _LoginPageState extends State<LoginPage> {
               //Navigator.of(context).pushReplacementNamed( '/home_tong_tin');
               Navigator
                   .of(context)
-                  .pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => ListPage(title : 'Persona ', userID: userID,)));
+                  .pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => ListPage( title: 'Persona', userID: userID,)));
             }
 
           });
@@ -224,7 +226,7 @@ class _LoginPageState extends State<LoginPage> {
                   builder: (context) =>ListPage(title : 'Persona ', userID: f.id,)));*/
           Navigator
               .of(context)
-              .pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => ListPage(title : 'Persona ', userID: f.id,)));
+              .pushReplacement(new MaterialPageRoute(builder: (BuildContext context) => ListPage( title: 'Persona', userID: f.id,)));
         });
 
       }, onError: (f){

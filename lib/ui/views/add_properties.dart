@@ -2,6 +2,7 @@ import 'dart:convert' as JSON;
 
 import 'package:TonTin/core/models/productModel.dart';
 import 'package:TonTin/core/viewmodels/CRUDModel.dart';
+import 'package:TonTin/util/share_pref.dart';
 import 'package:TonTin/util/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -9,6 +10,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vibrate/vibrate.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+
+import 'home_list.dart';
 
 
 class CreateProperty extends StatefulWidget {
@@ -29,6 +32,7 @@ class _CreatePropertyState extends State<CreateProperty> {
   final _formKey = GlobalKey<FormState>();
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isAutoValidate = false;
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   @override
   void dispose() {
@@ -307,7 +311,13 @@ class _CreatePropertyState extends State<CreateProperty> {
     Navigator.pop(context);
     await Utils.startHapticSuccess();
     await new Future.delayed(const Duration(seconds: 1));
-    Navigator.pop(context);
+    _prefs.then((f){
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>ListPage(title : 'Persona ', userID: f.getString(PrefUtil.KEY_USER_ID),)));
+    });
+
   }
 
 }
