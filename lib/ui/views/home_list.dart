@@ -10,6 +10,7 @@ import 'package:TonTin/ui/widgets/profile_page.dart';
 import 'package:TonTin/util/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ListPage extends StatefulWidget {
   ListPage({Key key, this.title, this.userID}) : super(key: key);
@@ -20,7 +21,7 @@ class ListPage extends StatefulWidget {
   @override
   _ListPageState createState() => _ListPageState();
 }
-final cardAspectRatio = 10.0 / 16.0;
+final cardAspectRatio = 12.0 / 16.0;
 final widgetAspectRatio = cardAspectRatio * 1.2;
 class _ListPageState extends State<ListPage> {
   PageController _pageController;
@@ -36,25 +37,25 @@ class _ListPageState extends State<ListPage> {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     super.initState();
     //var provider = Provider.of<CRUDModel>(context);
-    _pageController = PageController(initialPage: 0, keepPage: true);
+    _pageController = PageController(initialPage: 0, keepPage: true, viewportFraction: 1.0);
     _pageController.addListener(() {
       setState(() {
         currentPage = _pageController.page;
       });
 
       if(!_isFetching && properties.length != 0){
-      for(var me = 0 ; me < properties.length; me++){
-        if(me >= 1){
-          if(currentPage == (me/2) ){
-            //Utils.startHapticSuccess();
+        for(var me = 0 ; me < properties.length; me++){
+          if(me >= 1){
+            if(currentPage == (me/2) ){
+              //Utils.startHapticSuccess();
+            }
+          }else{
+            if(currentPage == 0.5){
+              //Utils.startHapticSuccess();
+            }
           }
-        }else{
-          if(currentPage == 0.5){
-            //Utils.startHapticSuccess();
-          }
-        }
 
-      }}
+        }}
 
     });
 
@@ -69,7 +70,10 @@ class _ListPageState extends State<ListPage> {
 
   @override
   Widget build(BuildContext context) {
-
+    var h =  MediaQuery.of(context).size.height;
+    print(h);
+    var w = MediaQuery.of(context).size.width;
+    ScreenUtil.instance = ScreenUtil(width: w, height:h)..init(context);
     final makeBottom = Container(
       height: 60.0,
       child: BottomAppBar(
@@ -235,20 +239,11 @@ class _ListPageState extends State<ListPage> {
               )) :
               properties.length != 0 ? Stack(
                 children: <Widget>[
-
-                  CardScrollWidget(currentPage, properties),
+                  Container(height:ScreenUtil.getInstance().setHeight(h * 0.6) ,),
+                  //CardScrollWidget(currentPage, properties),
 
                   Positioned.fill(
-                    child: PageView.builder(
-                      itemCount: properties.length,
-                      controller: _pageController,
-                      reverse: true,
-                      onPageChanged: _onPageViewChange,
-                      itemBuilder: (context, index) {
-                        return new GestureDetector( onTap: () => {print('get call')},
-                            child: IgnorePointer(child: Container()));
-                      },
-                    ),
+                    child: _pageViewBuilder(ScreenUtil.getInstance().setWidth(w), ScreenUtil.getInstance().setHeight(h * 0.6)),
                   )
                 ],
               ): promptNoItem(),
@@ -286,8 +281,126 @@ class _ListPageState extends State<ListPage> {
 
 
     });
+  }
+  var padding = 20.0;
+  var verticalInset = 20.0;
+
+  Widget _pageViewBuilder(double ww, double hh){
+
+    List<Widget> list = new List();
+    for(var me = 0; me < properties.length; me++){
+      var pageV = _pageView(me, ww, hh);
+      var stackWidget = new Stack(fit: StackFit.expand, children: <Widget>[pageV],);
+      pageV = stackWidget;
+
+      var al =  stackWidget;
 
 
+      list.add( al);
+    }
+    //var stackWidget = Stack(children: list,);
+    // var onePage = new Stack(children: list,);
+
+    return PageView(
+      controller: _pageController,
+      reverse: true,
+      onPageChanged: _onPageViewChange,
+      /* itemBuilder: (context, index) {
+        return _pageView(index, ww, hh);
+
+      },);*/
+      // children: <Widget>[stackWidget],
+      children: list,
+    );
+
+  }
+  Widget _pageView(int index, double ww, double hh){
+    var width = ww;
+    var height = hh;
+
+    print('$height && $width');
+
+    var safeWidth = width - 2  * padding;
+    // var safeHeight = height - 2 * padding;
+    var safeHeight = height - 2  * padding;
+
+    var heightOfPrimaryCard = safeHeight ;
+    var widthOfPrimaryCard = heightOfPrimaryCard * cardAspectRatio;
+
+    var primaryCardLeft = (safeWidth - widthOfPrimaryCard) ;
+    var horizontalInset = primaryCardLeft ;
+
+    var pos = index > 3 ? 0 : index;
+    var delta = index - currentPage;
+    bool isOnRight = delta > 0;
+
+    var start = padding + max(primaryCardLeft - horizontalInset * -delta * (isOnRight ? 50 : 1),  0.0);
+
+    var cardItem = Positioned.directional(
+      top: (padding  + verticalInset * max(-delta, 0.0)),
+      bottom: (padding + verticalInset * max(-delta, 0.0)) ,
+      start: start ,
+      textDirection: TextDirection.rtl,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16.0),
+        child: Container(
+          decoration: BoxDecoration(color: Colors.white, boxShadow: [
+            BoxShadow(
+                color: Colors.black12,
+                offset: Offset(3.0, 6.0),
+                blurRadius: 10.0)
+          ]),
+          child: AspectRatio(
+            aspectRatio: cardAspectRatio,
+            child: Stack(
+              fit: StackFit.expand,
+              children: <Widget>[
+                Image.asset(images[pos], fit: BoxFit.cover),
+                Align(
+                  alignment: Alignment.bottomLeft,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        child: Text(properties[index].title,
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25.0,
+                                fontFamily: "SF-Pro-Text-Regular")),
+                      ),
+                      SizedBox(
+                        height: 10.0,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 12.0, bottom: 12.0),
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 22.0, vertical: 6.0),
+                          decoration: BoxDecoration(
+                              color: Colors.blueAccent,
+                              borderRadius: BorderRadius.circular(20.0)),
+                          child: new GestureDetector(
+                            onTap: ()=> print('call la $index'),
+                            child: Text("មើលបន្ថែម",
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    return cardItem;
   }
 }
 
@@ -334,7 +447,7 @@ class CardScrollWidget extends StatelessWidget {
             top: (padding  + verticalInset * max(-delta, 0.0)),
             bottom: (padding + verticalInset * max(-delta, 0.0)) /1,
             start: start,
-            textDirection: TextDirection.rtl,
+            textDirection: TextDirection.ltr,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16.0),
               child: new GestureDetector( onTap: ()=> print('wil will'),
@@ -369,22 +482,22 @@ class CardScrollWidget extends StatelessWidget {
                               SizedBox(
                                 height: 10.0,
                               ),
-                               Padding(
-                                 padding: const EdgeInsets.only(
-                                     left: 12.0, bottom: 12.0),
-                                 child: Container(
-                                   padding: EdgeInsets.symmetric(
-                                       horizontal: 22.0, vertical: 6.0),
-                                   decoration: BoxDecoration(
-                                       color: Colors.blueAccent,
-                                       borderRadius: BorderRadius.circular(20.0)),
-                                   child: new GestureDetector(
-                                     onTap: ()=> print('call la'),
-                                     child: Text("មើលបន្ថែម",
-                                         style: TextStyle(color: Colors.white)),
-                                   ),
-                                 ),
-                               )
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 12.0, bottom: 12.0),
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 22.0, vertical: 6.0),
+                                  decoration: BoxDecoration(
+                                      color: Colors.blueAccent,
+                                      borderRadius: BorderRadius.circular(20.0)),
+                                  child: new GestureDetector(
+                                    onTap: ()=> print('call la'),
+                                    child: Text("មើលបន្ថែម",
+                                        style: TextStyle(color: Colors.white)),
+                                  ),
+                                ),
+                              )
                             ],
                           ),
                         )
@@ -430,7 +543,7 @@ double calculateTheRemain(double total, double finish){
 }
 
 double calculateRemainPeopleInPercentage(double total, double finish){
-   return (finish * 100 / total) / 100;
+  return (finish * 100 / total) / 100;
 
 }
 

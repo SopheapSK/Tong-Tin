@@ -23,29 +23,15 @@ final widgetAspectRatio = cardAspectRatio * 1.2;
 
 class _HomeCardState extends State<HomeCard> {
   var currentPage = images.length - 1.0;
-  bool _isFetching = false;
-  List<Product> products = new List();
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
-    var provider = Provider.of<CRUDModel>(context);
-    _fetchData(provider, widget.userID);
-    _isFetching = true;
-
     PageController controller = PageController(initialPage: images.length - 1);
     controller.addListener(() {
       setState(() {
         currentPage = controller.page;
       });
     });
-
-
 
     return Container(
       decoration: BoxDecoration(
@@ -92,7 +78,7 @@ class _HomeCardState extends State<HomeCard> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text("Persona",
+                    Text("Trending",
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 46.0,
@@ -101,13 +87,11 @@ class _HomeCardState extends State<HomeCard> {
                         )),
                     IconButton(
                       icon: Icon(
-                        Icons.add,
-                        size: 30.0,
-                        color: Colors.white70,
+                        CustomIcons.option,
+                        size: 12.0,
+                        color: Colors.white,
                       ),
-                      onPressed: () {
-                        Navigator.pushNamed(context, '/create');
-                      },
+                      onPressed: () {},
                     )
                   ],
                 ),
@@ -125,7 +109,7 @@ class _HomeCardState extends State<HomeCard> {
                         child: Padding(
                           padding: EdgeInsets.symmetric(
                               horizontal: 22.0, vertical: 6.0),
-                          child: Text("Total",
+                          child: Text("Animated",
                               style: TextStyle(color: Colors.white)),
                         ),
                       ),
@@ -133,19 +117,14 @@ class _HomeCardState extends State<HomeCard> {
                     SizedBox(
                       width: 15.0,
                     ),
-                    Text("${products.length} Tong Tin",
+                    Text("25+ Stories",
                         style: TextStyle(color: Colors.blueAccent))
                   ],
                 ),
               ),
-              _isFetching ? new Padding(padding: EdgeInsets.only(top: 40.0, bottom: 10.0) , child:  new Center(
-                child: new CircularProgressIndicator(backgroundColor: Colors.white,),
-              )) :
               Stack(
                 children: <Widget>[
-
                   CardScrollWidget(currentPage),
-
                   Positioned.fill(
                     child: PageView.builder(
                       itemCount: images.length,
@@ -166,19 +145,6 @@ class _HomeCardState extends State<HomeCard> {
       ),
     );
   }
-  void _fetchData(CRUDModel provider, String userID){
-    var data =  provider.getAllProperties(userID);
-    data.then((result){
-      setState(() {
-        //products = result;
-      });
-
-     // print(products);
-
-    });
-
-
-  }
 }
 
 class CardScrollWidget extends StatelessWidget {
@@ -196,14 +162,14 @@ class CardScrollWidget extends StatelessWidget {
         var width = contraints.maxWidth;
         var height = contraints.maxHeight;
 
-        var safeWidth = width - 2 * padding;
+        var safeWidth = width - 2  * padding;
         // var safeHeight = height - 2 * padding;
         var safeHeight = height - 2 * padding;
 
         var heightOfPrimaryCard = safeHeight ;
-        var widthOfPrimaryCard = heightOfPrimaryCard * cardAspectRatio;
+        var widthOfPrimaryCard = heightOfPrimaryCard * cardAspectRatio  ;
 
-        var primaryCardLeft = safeWidth - widthOfPrimaryCard;
+        var primaryCardLeft = (safeWidth - widthOfPrimaryCard ) ;
         var horizontalInset = primaryCardLeft / 2;
 
         List<Widget> cardList = new List();
@@ -217,6 +183,7 @@ class CardScrollWidget extends StatelessWidget {
                   primaryCardLeft -
                       horizontalInset * -delta * (isOnRight ? 15 : 1),
                   0.0);
+
 
           var cardItem = Positioned.directional(
             top: (padding  + verticalInset * max(-delta, 0.0)),
@@ -286,6 +253,4 @@ class CardScrollWidget extends StatelessWidget {
       }),
     );
   }
-
-
 }
