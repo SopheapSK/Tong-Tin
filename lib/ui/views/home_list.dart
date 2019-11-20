@@ -11,6 +11,7 @@ import 'package:TonTin/util/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class ListPage extends StatefulWidget {
   ListPage({Key key, this.title, this.userID}) : super(key: key);
@@ -24,7 +25,7 @@ class ListPage extends StatefulWidget {
 final cardAspectRatio = 12.0 / 16.0;
 final widgetAspectRatio = cardAspectRatio * 1.2;
 class _ListPageState extends State<ListPage> {
-  PageController _pageController;
+
   bool _isFetching = true;
   List<Property> properties = new List();
   List<Property> propertiesState = new List();
@@ -32,48 +33,65 @@ class _ListPageState extends State<ListPage> {
   var currentPageState = 0;
   bool isHomeActive = true;
   bool isProfileActive = false;
+  List<int> imageList;
+  var _alignment = Alignment.bottomLeft;
   @override
   void initState() {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
     super.initState();
-    //var provider = Provider.of<CRUDModel>(context);
-    _pageController = PageController(initialPage: 0, keepPage: true, viewportFraction: 1.0);
-    _pageController.addListener(() {
-      setState(() {
-        currentPage = _pageController.page;
-      });
 
-      if(!_isFetching && properties.length != 0){
-        for(var me = 0 ; me < properties.length; me++){
-          if(me >= 1){
-            if(currentPage == (me/2) ){
-              //Utils.startHapticSuccess();
-            }
-          }else{
-            if(currentPage == 0.5){
-              //Utils.startHapticSuccess();
-            }
-          }
-
-        }}
-
-    });
 
     _fetchData(new CRUDModel(), widget.userID);
 
   }
   @override
   void dispose() {
-    _pageController.dispose();
+
     super.dispose();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+
     var h =  MediaQuery.of(context).size.height;
-    print(h);
     var w = MediaQuery.of(context).size.width;
     ScreenUtil.instance = ScreenUtil(width: w, height:h)..init(context);
+
+    final pageSlider =  CarouselSlider(
+
+      onPageChanged: _onPageViewChange,
+      enlargeCenterPage: true,
+      initialPage: 0,
+      enableInfiniteScroll: false,
+      aspectRatio: 12/16,
+      height: ScreenUtil.getInstance().setHeight(h * 0.6),
+      items: properties.asMap().map((index, value) =>
+          MapEntry(index, Container(
+              width: MediaQuery.of(context).size.width,
+              margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              child: _pageView( index, value))))
+          .values
+          .toList());
+
+
+
+      /*items: properties.map((i) {
+
+        return Builder(
+          builder: (BuildContext context) {
+
+            return Container(
+                width: MediaQuery.of(context).size.width,
+                margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                child: _pageView(i, (i.amount) == null ? 0 : (i.amount) % 2 == 0 ? 0:1)
+            );
+          },
+        );
+      }).toList()*/
+
+
     final makeBottom = Container(
       height: 60.0,
       child: BottomAppBar(
@@ -88,14 +106,13 @@ class _ListPageState extends State<ListPage> {
                 setState(() {
                   isProfileActive = !isProfileActive;
                   isHomeActive = !isHomeActive;
-
+                  _alignment =  Alignment.center;
                 });
 
                 WidgetsBinding.instance
                     .addPostFrameCallback((_){
 
-                  if(_pageController.hasClients)
-                    _pageController.animateToPage( currentPage.floor() , duration: Duration(seconds: 2), curve: Curves.fastOutSlowIn);
+                    //pageSlider.animateToPage( currentPageState , duration: Duration(seconds: 2), curve: Curves.fastOutSlowIn);
                 });
               },
             ),
@@ -155,7 +172,7 @@ class _ListPageState extends State<ListPage> {
       child: Scaffold(
         bottomNavigationBar: makeBottom,
         backgroundColor: Colors.transparent,
-        body: isHomeActive ? SingleChildScrollView(
+        body: isHomeActive ?  SingleChildScrollView(
           child: Column(
             children: <Widget>[
               Padding(
@@ -174,8 +191,9 @@ class _ListPageState extends State<ListPage> {
                     ),
                     IconButton(
                       icon: Icon(
-                        Icons.search,
-                        color: Colors.transparent,
+                       // Icons.search,
+                        CustomIcons.menu,
+                        color: Colors.white,
                         size: 30.0,
                       ),
                       onPressed: () {},
@@ -237,16 +255,16 @@ class _ListPageState extends State<ListPage> {
               _isFetching ? new Padding(padding: EdgeInsets.only(top: 40.0, bottom: 10.0) , child:  new Center(
                 child: new CircularProgressIndicator(backgroundColor: Colors.white,),
               )) :
-              properties.length != 0 ? Stack(
+              properties.length != 0 ? AnimatedContainer (
+                alignment: _alignment,
+                duration: Duration(seconds: 2),
+                child: Stack(
                 children: <Widget>[
                   Container(height:ScreenUtil.getInstance().setHeight(h * 0.6) ,),
                   //CardScrollWidget(currentPage, properties),
-
-                  Positioned.fill(
-                    child: _pageViewBuilder(ScreenUtil.getInstance().setWidth(w), ScreenUtil.getInstance().setHeight(h * 0.6)),
-                  )
+                  pageSlider
                 ],
-              ): promptNoItem(),
+              ),) : promptNoItem(),
 
 
             ],
@@ -256,10 +274,10 @@ class _ListPageState extends State<ListPage> {
     );
   }
   _onPageViewChange(int page) {
-
     setState(() {
       currentPageState = page;
     });
+    Utils.startHapticSuccess();
 
   }
   void _fetchData(CRUDModel provider, String userID){
@@ -272,135 +290,74 @@ class _ListPageState extends State<ListPage> {
 
       });
 
-      WidgetsBinding.instance
-          .addPostFrameCallback((_){
-
-        if(_pageController.hasClients)
-          _pageController.animateToPage( properties.length - 1 , duration: Duration(seconds: 2), curve: Curves.fastOutSlowIn);
-      });
-
-
     });
   }
   var padding = 20.0;
   var verticalInset = 20.0;
 
-  Widget _pageViewBuilder(double ww, double hh){
 
-    List<Widget> list = new List();
-    for(var me = 0; me < properties.length; me++){
-      var pageV = _pageView(me, ww, hh);
-      var stackWidget = new Stack(fit: StackFit.expand, children: <Widget>[pageV],);
-      pageV = stackWidget;
+  Widget _pageView( int index , Property property){
+    var r = index > 3 ? 2 : index;
 
-      var al =  stackWidget;
+    return ClipRRect(
+       borderRadius: BorderRadius.circular(24.0),
+       child: Container(
+         decoration: BoxDecoration(color: Colors.white, boxShadow: [
+           BoxShadow(
+               color: Colors.black12,
+               offset: Offset(3.0, 6.0),
+               blurRadius: 10.0)
+         ]),
+         child: AspectRatio(
+           aspectRatio: cardAspectRatio,
+           child: Stack(
+             fit: StackFit.expand,
+             children: <Widget>[
+               Image.asset(images[r], fit: BoxFit.cover),
+               Align(
+                 alignment: Alignment.bottomLeft,
+                 child: Column(
+                   mainAxisSize: MainAxisSize.min,
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: <Widget>[
+                     Padding(
+                       padding: EdgeInsets.symmetric(
+                           horizontal: 16.0, vertical: 8.0),
+                       child: Text(property.title,
+                           style: TextStyle(
+                               color: Colors.white,
+                               fontSize: 25.0,
+                               fontFamily: "SF-Pro-Text-Regular")),
+                     ),
+                     SizedBox(
+                       height: 10.0,
+                     ),
+                     Padding(
+                       padding: const EdgeInsets.only(
+                           left: 12.0, bottom: 12.0),
+                       child: Container(
+                         padding: EdgeInsets.symmetric(
+                             horizontal: 22.0, vertical: 6.0),
+                         decoration: BoxDecoration(
+                             color: Colors.blueAccent,
+                             borderRadius: BorderRadius.circular(20.0)),
+                         child: new GestureDetector(
+                           onTap: ()=> print('call la ${property.amount}'),
+                           child: Text("មើលបន្ថែម",
+                               style: TextStyle(color: Colors.white)),
+                         ),
+                       ),
+                     )
+                   ],
+                 ),
+               )
+             ],
+           ),
+         ),
+       ),
+     );
 
 
-      list.add( al);
-    }
-    //var stackWidget = Stack(children: list,);
-    // var onePage = new Stack(children: list,);
-
-    return PageView(
-      controller: _pageController,
-      reverse: true,
-      onPageChanged: _onPageViewChange,
-      /* itemBuilder: (context, index) {
-        return _pageView(index, ww, hh);
-
-      },);*/
-      // children: <Widget>[stackWidget],
-      children: list,
-    );
-
-  }
-  Widget _pageView(int index, double ww, double hh){
-    var width = ww;
-    var height = hh;
-
-    print('$height && $width');
-
-    var safeWidth = width - 2  * padding;
-    // var safeHeight = height - 2 * padding;
-    var safeHeight = height - 2  * padding;
-
-    var heightOfPrimaryCard = safeHeight ;
-    var widthOfPrimaryCard = heightOfPrimaryCard * cardAspectRatio;
-
-    var primaryCardLeft = (safeWidth - widthOfPrimaryCard) ;
-    var horizontalInset = primaryCardLeft ;
-
-    var pos = index > 3 ? 0 : index;
-    var delta = index - currentPage;
-    bool isOnRight = delta > 0;
-
-    var start = padding + max(primaryCardLeft - horizontalInset * -delta * (isOnRight ? 50 : 1),  0.0);
-
-    var cardItem = Positioned.directional(
-      top: (padding  + verticalInset * max(-delta, 0.0)),
-      bottom: (padding + verticalInset * max(-delta, 0.0)) ,
-      start: start ,
-      textDirection: TextDirection.rtl,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16.0),
-        child: Container(
-          decoration: BoxDecoration(color: Colors.white, boxShadow: [
-            BoxShadow(
-                color: Colors.black12,
-                offset: Offset(3.0, 6.0),
-                blurRadius: 10.0)
-          ]),
-          child: AspectRatio(
-            aspectRatio: cardAspectRatio,
-            child: Stack(
-              fit: StackFit.expand,
-              children: <Widget>[
-                Image.asset(images[pos], fit: BoxFit.cover),
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
-                        child: Text(properties[index].title,
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 25.0,
-                                fontFamily: "SF-Pro-Text-Regular")),
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                            left: 12.0, bottom: 12.0),
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 22.0, vertical: 6.0),
-                          decoration: BoxDecoration(
-                              color: Colors.blueAccent,
-                              borderRadius: BorderRadius.circular(20.0)),
-                          child: new GestureDetector(
-                            onTap: ()=> print('call la $index'),
-                            child: Text("មើលបន្ថែម",
-                                style: TextStyle(color: Colors.white)),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    return cardItem;
   }
 }
 
@@ -482,22 +439,22 @@ class CardScrollWidget extends StatelessWidget {
                               SizedBox(
                                 height: 10.0,
                               ),
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                    left: 12.0, bottom: 12.0),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 22.0, vertical: 6.0),
-                                  decoration: BoxDecoration(
-                                      color: Colors.blueAccent,
-                                      borderRadius: BorderRadius.circular(20.0)),
-                                  child: new GestureDetector(
-                                    onTap: ()=> print('call la'),
-                                    child: Text("មើលបន្ថែម",
-                                        style: TextStyle(color: Colors.white)),
-                                  ),
-                                ),
-                              )
+                               Padding(
+                                 padding: const EdgeInsets.only(
+                                     left: 12.0, bottom: 12.0),
+                                 child: Container(
+                                   padding: EdgeInsets.symmetric(
+                                       horizontal: 22.0, vertical: 6.0),
+                                   decoration: BoxDecoration(
+                                       color: Colors.blueAccent,
+                                       borderRadius: BorderRadius.circular(20.0)),
+                                   child: new GestureDetector(
+                                     onTap: ()=> print('call la'),
+                                     child: Text("មើលបន្ថែម",
+                                         style: TextStyle(color: Colors.white)),
+                                   ),
+                                 ),
+                               )
                             ],
                           ),
                         )
@@ -543,7 +500,7 @@ double calculateTheRemain(double total, double finish){
 }
 
 double calculateRemainPeopleInPercentage(double total, double finish){
-  return (finish * 100 / total) / 100;
+   return (finish * 100 / total) / 100;
 
 }
 
