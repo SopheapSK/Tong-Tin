@@ -1,5 +1,6 @@
 import 'package:TonTin/core/models/productModel.dart';
 import 'package:TonTin/core/viewmodels/CRUDModel.dart';
+import 'package:TonTin/model/data.dart';
 import 'package:TonTin/model/lesson_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -57,33 +58,31 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
       children: <Widget>[
       Container(
         margin: EdgeInsets.all(16.0),
-        child: InkWell(
-          onTap: () {
+        child: IconButton(
+          onPressed: () {
             Navigator.pop(context);
           },
-          child: new Hero(
-              tag: insideProperty.id,
-              child: Icon(Icons.arrow_back, color: Colors.white)),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
         ),
       ),
 
       Container(
         margin: EdgeInsets.all(16.0),
-        child: InkWell(
-          onTap: () {
+        child: IconButton(
+          onPressed: () {
             _confirmDoneBid(context, 1, insideProperty, provider);
            // Navigator.pop(context);
           },
-          child: Icon(Icons.cloud_done, color: Colors.white),
+          icon: Icon(Icons.cloud_done, color: Colors.white),
         ),
       ),
       Container(
         margin: EdgeInsets.all(16.0),
-        child: InkWell(
-          onTap: () {
+        child: IconButton(
+          onPressed: () {
             _confirmDelete(context, 1, widget.property, provider);
           },
-          child: Icon(Icons.delete_forever, color: Colors.white),
+          icon: Icon(Icons.delete_forever, color: Colors.white),
         ),
       ),
     ],);
@@ -91,19 +90,45 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
 
 
     return Scaffold(
-      body: Container(
-        color: Color.fromRGBO(58, 66, 86, 1),
-        child: Column(
-          children: <Widget>[
-            SizedBox(
-              height: 30.0,
+      body: Stack(
+        children:<Widget>[
+
+
+          Positioned.fill(  //
+            child: Hero(
+              tag: widget.property.id,
+              child:  ClipPath(
+                child: Container(color:Color(0xFF1b1e44).withOpacity(1)),
+                clipper: getClipper(),
+              ),
             ),
-            topContent,
-            topContentText,
-            headerInfo(context, insideProperty),
-            Expanded(child: _buildList(context, insideProperty, provider))
-          ],
-        ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    colors: [
+
+                      Color(0xFF1b1e44),
+                      Color(0xFF2d3447).withOpacity(0.9),
+                    ],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    tileMode: TileMode.clamp)),
+            child: Column(
+              children: <Widget>[
+
+                SizedBox(
+                  height: 30.0,
+                ),
+                topContent,
+                topContentText,
+                headerInfo(context, insideProperty),
+                Expanded(child: _buildList(context, insideProperty, provider))
+              ],
+            ),
+          ),
+
+        ],
       ),
     );
   }
@@ -157,11 +182,13 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
       totalInterest+= lastMonthInterst;
     });
     return Container(
+
       padding: EdgeInsets.symmetric(vertical: 4.0, horizontal: 10.0),
-      color: Color.fromRGBO(58, 66, 86, 1),
+      color: Color.fromRGBO(58, 66, 86, 0.0),
       child: new Center(
         child: Column(
           children: <Widget>[
+
 
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -218,7 +245,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
     }
 
     return Container(
-      color: Colors.blueGrey,
+      color: Colors.transparent,
       child: ListView.builder(
         scrollDirection: Axis.vertical,
         shrinkWrap: true,
@@ -233,7 +260,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
 
   Widget makeListItem(BuildContext context, int index, String info, Property snapshot, bool isCurrentMonth, CRUDModel provider) {
     return Container(
-        color: isCurrentMonth ? Color.fromRGBO(58, 66, 86, 1) : index % 2 == 0 ? Colors.blueGrey : Color.fromRGBO(58, 66, 86, .2) ,
+        color: isCurrentMonth ? Color.fromRGBO(58, 66, 86, 0.9) : index % 2 == 0 ? Color.fromRGBO(58, 66, 86, .1)  : Color.fromRGBO(58, 66, 86, .4) ,
         child: makeListTile(context,index,  info, snapshot, provider));
   }
 
@@ -276,9 +303,9 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
           )
         ],
       ),
-      trailing: GestureDetector(
-          onTap: ()=> _showBottomSheet(context, index, property, provider)
-          , child: Icon(Icons.edit, color: Colors.white, size: 20.0)),
+      trailing: IconButton(
+          onPressed: ()=> _showBottomSheet(context, index, property, provider)
+          , icon: Icon(Icons.edit, color: Colors.white, size: 20.0)),
 
       onLongPress: () {
        // print('tap for more');
@@ -650,5 +677,23 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
             ),
           );
         });
+  }
+}
+
+class getClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = new Path();
+
+    path.lineTo(0.0, size.height * 0.9);
+    path.lineTo(size.width + 400.0, 0.0);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper<Path> oldClipper) {
+    // TODO: implement shouldReclip
+    return true;
   }
 }

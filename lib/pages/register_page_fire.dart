@@ -67,7 +67,7 @@ class _RegisterPageState extends State<RegisterPage> {
       child: CircleAvatar(
         backgroundColor: Colors.transparent,
         radius: 48.0,
-        child: Icon(Icons.wifi_tethering, size: 90.0, color: Colors.blueAccent,),
+        child: Icon(Icons.wifi_tethering, size: 90.0, color: Colors.white,),
       ),
     );
 
@@ -75,11 +75,28 @@ class _RegisterPageState extends State<RegisterPage> {
       controller: userNameController,
       keyboardType: TextInputType.phone,
       autofocus: false,
-
+      style:  TextStyle(color: Colors.white),
       decoration: InputDecoration(
+        prefixIcon: const Icon(
+          Icons.smartphone,
+          color: Colors.white70,
+        ),
         hintText: 'Phone Number',
+        hintStyle: TextStyle(color: Colors.white70),
+        hoverColor: Colors.transparent,
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+
+        border:OutlineInputBorder(
+          gapPadding: 32.0,
+          borderRadius:  BorderRadius.all(Radius.circular(24.0)),
+          borderSide: const BorderSide(color: Colors.white, width: 1.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(24.0)),
+          borderSide: BorderSide(width: 1,color: Colors.white70),
+        ),
+
+
       ),
     );
 
@@ -89,27 +106,63 @@ class _RegisterPageState extends State<RegisterPage> {
       keyboardType: TextInputType.number,
       maxLength: 4,
       obscureText: true,
+      style:  TextStyle(color: Colors.white),
       decoration: InputDecoration(
+        prefixIcon: const Icon(
+          Icons.security,
+          color: Colors.white70,
+        ),
         hintText: 'Password',
+        hintStyle: TextStyle(color: Colors.white70),
+        hoverColor: Colors.transparent,
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+
+        border:OutlineInputBorder(
+          gapPadding: 32.0,
+          borderRadius:  BorderRadius.all(Radius.circular(24.0)),
+          borderSide: const BorderSide(color: Colors.white, width: 1.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(24.0)),
+          borderSide: BorderSide(width: 1,color: Colors.white70),
+        ),
+
+
       ),
     );
     final passwordConfirm = TextFormField(
       controller: passwordConfirmController,
       autofocus: false,
       maxLength: 4,
+      style:  TextStyle(color: Colors.white),
       keyboardType: TextInputType.number,
       obscureText: true,
       decoration: InputDecoration(
+        prefixIcon: const Icon(
+          Icons.security,
+          color: Colors.white70,
+        ),
         hintText: 'Confirm Password',
+        hintStyle: TextStyle(color: Colors.white70),
+        hoverColor: Colors.transparent,
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
+
+        border:OutlineInputBorder(
+          gapPadding: 32.0,
+          borderRadius:  BorderRadius.all(Radius.circular(24.0)),
+          borderSide: const BorderSide(color: Colors.white, width: 1.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(24.0)),
+          borderSide: BorderSide(width: 1,color: Colors.white70),
+        ),
+
+
       ),
     );
 
     var progressBar = new Container(
-      decoration: new BoxDecoration(color: Colors.white),
+      decoration: new BoxDecoration(color: Colors.transparent),
       child: new Center(
         child: new CircularProgressIndicator(),
       ),
@@ -128,30 +181,42 @@ class _RegisterPageState extends State<RegisterPage> {
         },
 
         padding: EdgeInsets.all(12),
-        color: Colors.lightBlueAccent,
+        color: Colors.blueAccent,
         child: Text(submitting ? 'Loading' : 'Go Now', style: TextStyle(color: Colors.white)),
       ),
     );
 
-    return new Scaffold(
-      backgroundColor: Colors.white,
-      body:   new Center(
-        child: submitting ? progressBar : ListView(
-          shrinkWrap: true,
-          padding: EdgeInsets.only(left: 24.0, right: 24.0),
-          children: <Widget>[
-            logo,
-            SizedBox(height: 48.0),
-            email,
-            SizedBox(height: 8.0),
-            password,
-            SizedBox(height: 8.0),
-            passwordConfirm,
-            SizedBox(height: 24.0),
-            loginButton,
+    return Container(
+      decoration: BoxDecoration(
+          gradient: LinearGradient(
+              colors: [
+
+                Color(0xFF1b1e44),
+                Color(0xFF2d3447),
+              ],
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              tileMode: TileMode.clamp)),
+      child: new Scaffold(
+        backgroundColor: Colors.transparent,
+        body:   new Center(
+          child: submitting ? progressBar : ListView(
+            shrinkWrap: true,
+            padding: EdgeInsets.only(left: 24.0, right: 24.0),
+            children: <Widget>[
+              logo,
+              SizedBox(height: 48.0),
+              email,
+              SizedBox(height: 8.0),
+              password,
+              SizedBox(height: 8.0),
+              passwordConfirm,
+              SizedBox(height: 24.0),
+              loginButton,
 
 
-          ],
+            ],
+          ),
         ),
       ),
     );

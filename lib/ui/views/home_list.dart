@@ -34,7 +34,7 @@ class _ListPageState extends State<ListPage> {
   bool isHomeActive = true;
   bool isProfileActive = false;
   List<int> imageList;
-  var _alignment = Alignment.bottomLeft;
+
   @override
   void initState() {
     SystemChannels.textInput.invokeMethod('TextInput.hide');
@@ -95,7 +95,7 @@ class _ListPageState extends State<ListPage> {
     final makeBottom = Container(
       height: 60.0,
       child: BottomAppBar(
-        color: Color.fromRGBO(58, 66, 86, 1.0),
+        color:  Color(0xFF2d3447),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
@@ -106,7 +106,7 @@ class _ListPageState extends State<ListPage> {
                 setState(() {
                   isProfileActive = !isProfileActive;
                   isHomeActive = !isHomeActive;
-                  _alignment =  Alignment.center;
+
                 });
 
                 WidgetsBinding.instance
@@ -255,16 +255,13 @@ class _ListPageState extends State<ListPage> {
               _isFetching ? new Padding(padding: EdgeInsets.only(top: 40.0, bottom: 10.0) , child:  new Center(
                 child: new CircularProgressIndicator(backgroundColor: Colors.white,),
               )) :
-              properties.length != 0 ? AnimatedContainer (
-                alignment: _alignment,
-                duration: Duration(seconds: 2),
-                child: Stack(
-                children: <Widget>[
-                  Container(height:ScreenUtil.getInstance().setHeight(h * 0.6) ,),
-                  //CardScrollWidget(currentPage, properties),
-                  pageSlider
-                ],
-              ),) : promptNoItem(),
+              properties.length != 0 ? Stack(
+              children: <Widget>[
+                Container(height:ScreenUtil.getInstance().setHeight(h * 0.6) ,),
+                //CardScrollWidget(currentPage, properties),
+                pageSlider
+              ],
+              ) : promptNoItem(),
 
 
             ],
@@ -301,57 +298,63 @@ class _ListPageState extends State<ListPage> {
 
     return ClipRRect(
        borderRadius: BorderRadius.circular(24.0),
-       child: Container(
-         decoration: BoxDecoration(color: Colors.white, boxShadow: [
-           BoxShadow(
-               color: Colors.black12,
-               offset: Offset(3.0, 6.0),
-               blurRadius: 10.0)
-         ]),
-         child: AspectRatio(
-           aspectRatio: cardAspectRatio,
-           child: Stack(
-             fit: StackFit.expand,
-             children: <Widget>[
-               Image.asset(images[r], fit: BoxFit.cover),
-               Align(
-                 alignment: Alignment.bottomLeft,
-                 child: Column(
-                   mainAxisSize: MainAxisSize.min,
-                   crossAxisAlignment: CrossAxisAlignment.start,
-                   children: <Widget>[
-                     Padding(
-                       padding: EdgeInsets.symmetric(
-                           horizontal: 16.0, vertical: 8.0),
-                       child: Text(property.title,
-                           style: TextStyle(
-                               color: Colors.white,
-                               fontSize: 25.0,
-                               fontFamily: "SF-Pro-Text-Regular")),
-                     ),
-                     SizedBox(
-                       height: 10.0,
-                     ),
-                     Padding(
-                       padding: const EdgeInsets.only(
-                           left: 12.0, bottom: 12.0),
-                       child: Container(
+       child: GestureDetector(
+         onTap: () {
+           Utils.startHapticSuccess();
+           Navigator.push(
+               context,
+               MaterialPageRoute(
+                   builder: (context) => DetailTongTinPage(property: property,)));
+         },
+         child: Container(
+           decoration: BoxDecoration(color: Colors.white, boxShadow: [
+             BoxShadow(
+                 color: Colors.black12,
+                 offset: Offset(3.0, 6.0),
+                 blurRadius: 10.0)
+           ]),
+           child: AspectRatio(
+             aspectRatio: cardAspectRatio,
+             child: Stack(
+               fit: StackFit.expand,
+               children: <Widget>[
+                 Image.asset(images[r], fit: BoxFit.cover),
+                 Align(
+                   alignment: Alignment.bottomLeft,
+                   child: Column(
+                     mainAxisSize: MainAxisSize.min,
+                     crossAxisAlignment: CrossAxisAlignment.start,
+                     children: <Widget>[
+                       Padding(
                          padding: EdgeInsets.symmetric(
-                             horizontal: 22.0, vertical: 6.0),
-                         decoration: BoxDecoration(
-                             color: Colors.blueAccent,
-                             borderRadius: BorderRadius.circular(20.0)),
-                         child: new GestureDetector(
-                           onTap: ()=> print('call la ${property.amount}'),
+                             horizontal: 16.0, vertical: 8.0),
+                         child: Text(property.title,
+                             style: TextStyle(
+                                 color: Colors.white,
+                                 fontSize: 25.0,
+                                 fontFamily: "SF-Pro-Text-Regular")),
+                       ),
+                       SizedBox(
+                         height: 10.0,
+                       ),
+                       Padding(
+                         padding: const EdgeInsets.only(
+                             left: 12.0, bottom: 12.0),
+                         child: Container(
+                           padding: EdgeInsets.symmetric(
+                               horizontal: 22.0, vertical: 6.0),
+                           decoration: BoxDecoration(
+                               color: Colors.blueAccent,
+                               borderRadius: BorderRadius.circular(20.0)),
                            child: Text("មើលបន្ថែម",
                                style: TextStyle(color: Colors.white)),
                          ),
-                       ),
-                     )
-                   ],
-                 ),
-               )
-             ],
+                       )
+                     ],
+                   ),
+                 )
+               ],
+             ),
            ),
          ),
        ),
@@ -449,7 +452,10 @@ class CardScrollWidget extends StatelessWidget {
                                        color: Colors.blueAccent,
                                        borderRadius: BorderRadius.circular(20.0)),
                                    child: new GestureDetector(
-                                     onTap: ()=> print('call la'),
+                                     onTap: ()=>  Navigator.push(
+                                         context,
+                                         MaterialPageRoute(
+                                             builder: (context) => DetailTongTinPage(property: null,))),
                                      child: Text("មើលបន្ថែម",
                                          style: TextStyle(color: Colors.white)),
                                    ),

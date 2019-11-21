@@ -11,7 +11,7 @@ class Profile extends StatelessWidget {
    return new Stack(
       children: <Widget>[
         ClipPath(
-          child: Container(color: Colors.black.withOpacity(0.8)),
+          child: Container(color: Colors.black.withOpacity(0.1)),
           clipper: getClipper(),
         ),
         Positioned(
