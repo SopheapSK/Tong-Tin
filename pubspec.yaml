@@ -71,18 +71,16 @@ flutter:
   uses-material-design: true
 
   assets:
-  - assets/logo.png
-  - assets/alucard.jpg
-  - assets/money.png
-  - assets/phone.jpg
-  - assets/bag.jpg
-  - assets/computer.jpg
-  - assets/dress.jpg
-  - assets/shoes.jpg
+
   - assets/image_01.png
   - assets/image_02.jpg
   - assets/image_03.jpg
   - assets/image_04.jpg
+  - assets/image_05.jpg
+  - assets/image_06.jpg
+  - assets/image_07.jpg
+  - assets/image_08.jpg
+  - assets/image_09.jpg
 
   fonts:
   - family: Nunito

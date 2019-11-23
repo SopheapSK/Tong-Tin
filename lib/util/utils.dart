@@ -9,19 +9,19 @@ import 'dart:convert' as JSON;
 import 'package:vibrate/vibrate.dart';
 
 class Utils {
-
+  static final int DURATION = 3;
   static void showToast(BuildContext context, String message) {
-    Toast.show(message, context, gravity: Toast.BOTTOM);
+    Toast.show(  message, context, duration: DURATION, gravity: Toast.TOP, backgroundColor: Colors.white, textColor: Colors.black87);
   }
 
   static void showToastError(BuildContext context, String message) {
-    Toast.show(message, context, gravity: Toast.BOTTOM,
+    Toast.show(message, context,  duration: DURATION, gravity: Toast.TOP,
         backgroundColor: Colors.red,
         textColor: Colors.white);
   }
 
   static void showToastInfo(BuildContext context, String message) {
-    Toast.show(message, context, gravity: Toast.BOTTOM,
+    Toast.show(message, context, duration: DURATION, gravity: Toast.TOP,
         backgroundColor: Colors.blue,
         textColor: Colors.white);
   }
@@ -83,7 +83,7 @@ class Utils {
    return  showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        backgroundColor: Colors.green,
+       backgroundColor: Color(0xFF2d3447),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),

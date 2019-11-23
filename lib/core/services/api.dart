@@ -19,8 +19,8 @@ class Api {
   Future<QuerySnapshot> getDataCollection() {
     return ref.getDocuments();
   }
-  Future<QuerySnapshot> getPropertyCollection(String userID) {
-    return ref.firestore.collection(PROPERTY + userID).orderBy('createOn', descending: true).getDocuments();
+  Future<QuerySnapshot> getPropertyCollection(String userID, {bool isDesc = true}) {
+    return ref.firestore.collection(PROPERTY + userID).orderBy('createOn', descending: isDesc).getDocuments();
   }
 
   Future<QuerySnapshot> getUsersCollection() {
@@ -69,8 +69,8 @@ class Api {
     return ref.firestore.collection(PROPERTY + userID).document(id).updateData(data);
   }
 
-  Future<QuerySnapshot> getUserID(String phone) {
-    return ref.firestore.collection(MEMBERS).where("phone", isEqualTo: phone).getDocuments();
+  Future<QuerySnapshot> getUserID(String phone, String pw) {
+    return ref.firestore.collection(MEMBERS).where("phone", isEqualTo: phone).where("password", isEqualTo: pw).getDocuments();
   }
 
 }

@@ -33,7 +33,7 @@ class Profile extends StatelessWidget {
                           BoxShadow(blurRadius: 7.0, color: Colors.black)
                         ]))*/
 
-               Icon(Icons.wifi_tethering, size: 90.0, color: Colors.white,),
+               Icon(Icons.wifi_tethering, size: 90.0, color:  Colors.blueAccent,),
 
 
             SizedBox(height: MediaQuery.of(context).size.height / 10.0),
@@ -80,14 +80,13 @@ class Profile extends StatelessWidget {
                       shadowColor: Colors.redAccent,
                       color: Colors.red,
                       elevation: 7.0,
-                      child: GestureDetector(
-                        onTap: () {
+                      child: InkWell(
+                        onTap: (){
                           _prefs.then((f){
                             f.setString(PrefUtil.KEY_USER_ID, null);
                             Navigator.pushReplacementNamed(context, '/');
 
                           });
-
                         },
                         child: Center(
                           child: Text(

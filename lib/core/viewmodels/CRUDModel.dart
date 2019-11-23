@@ -20,8 +20,8 @@ class CRUDModel extends ChangeNotifier {
         .toList();
     return products;
   }
-  Future<List<Property>> getAllProperties(String userID) async {
-    var result = await _api.getPropertyCollection(userID);
+  Future<List<Property>> getAllProperties(String userID, {bool isDesc = true}) async {
+    var result = await _api.getPropertyCollection(userID, isDesc: isDesc);
     var props = result.documents
         .map((doc) => Property.fromMap(doc.data, doc.documentID))
         .toList();
@@ -79,7 +79,7 @@ class CRUDModel extends ChangeNotifier {
   }
 
   Future addNewProperty(Property data, String userID) async{
-    print('result: ${data.toJson()}' );
+
     await _api.addProperty(data.toJson(), userID) ;
 
     return ;
@@ -101,7 +101,7 @@ class CRUDModel extends ChangeNotifier {
 
 
   // user part
-  Future addUser(Users data) async{
+  Future<DocumentReference> addUser(Users data) async{
     return await _api.addNewUser(data.toJson()) ;
 
   }
@@ -111,7 +111,8 @@ class CRUDModel extends ChangeNotifier {
   }
 
   Future<Users> getUserID(String phone, String pw) async {
-    var result = await _api.getUserID(phone);
+    var result = await _api.getUserID(phone,pw);
+
     users = result.documents
         .map((doc) => Users.fromMap(doc.data, doc.documentID))
         .toList();

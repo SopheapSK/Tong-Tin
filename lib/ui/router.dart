@@ -1,15 +1,11 @@
-import 'package:TonTin/home_page.dart';
 
-import 'package:TonTin/pages/list_notification_report.dart';
 import 'package:TonTin/pages/login_page_fire.dart';
-import 'package:TonTin/pages/main_page.dart';
 import 'package:TonTin/pages/register_page_fire.dart';
 import 'package:TonTin/ui/views/add_properties.dart';
 import 'package:TonTin/ui/views/home_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import './views/addProduct.dart';
-import './views/productDetails.dart';
+
 
 class Router {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -22,14 +18,8 @@ class Router {
         return  MaterialPageRoute(
             builder: (_)=>  ListPage(title: ' Personal ', userID: null,)
         );
-      case '/addProduct' :
-        return MaterialPageRoute(
-          builder: (_)=> AddProduct()
-        ) ;
-      case '/productDetails' :
-        return MaterialPageRoute(
-            builder: (_)=> ProductDetails()
-        ) ;
+
+
       case '/login' :
         return MaterialPageRoute(
             builder: (_)=>  LoginPage()
@@ -38,10 +28,7 @@ class Router {
         return MaterialPageRoute(
             builder: (_)=>  RegisterPage()
         ) ;
-      case '/home' :
-        return MaterialPageRoute(
-            builder: (_)=>  DrawerSlideWithHeader()
-        ) ;
+
       case '/list_notification' :
         return MaterialPageRoute(
             builder: (_)=>  ListPage(title: 'Lessons')

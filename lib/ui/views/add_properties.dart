@@ -2,6 +2,7 @@ import 'dart:convert' as JSON;
 
 import 'package:TonTin/core/models/productModel.dart';
 import 'package:TonTin/core/viewmodels/CRUDModel.dart';
+import 'package:TonTin/util/lang.dart';
 import 'package:TonTin/util/share_pref.dart';
 import 'package:TonTin/util/utils.dart';
 import 'package:flutter/material.dart';
@@ -15,13 +16,16 @@ import 'home_list.dart';
 
 
 class CreateProperty extends StatefulWidget {
+  final userID;
   static String tag = 'login-page';
+
+  const CreateProperty({Key key, this.userID}) : super(key: key);
   @override
   _CreatePropertyState createState() => new _CreatePropertyState();
 }
 
 class _CreatePropertyState extends State<CreateProperty> {
-  final USER_ID = "xm0RJnDMeW6ggADBFKDY";
+
   final df = new DateFormat('dd-MM-yyyy');
   String _currentDateTime =  '';
 
@@ -32,7 +36,6 @@ class _CreatePropertyState extends State<CreateProperty> {
   final _formKey = GlobalKey<FormState>();
   final scaffoldKey = GlobalKey<ScaffoldState>();
   bool _isAutoValidate = false;
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   @override
   void dispose() {
@@ -95,15 +98,22 @@ class _CreatePropertyState extends State<CreateProperty> {
       autocorrect: false,
       validator: (value) {
         if (value.isEmpty) {
-          return 'Please Enter Data';
+          return Language.errorFieldRequire();
         }
         return null;
       },
-
+      maxLength: 100,
+      style:  TextStyle(color: Colors.white),
       decoration: InputDecoration(
+        hintStyle: TextStyle(color: Colors.white70),
         hintText: 'ex: Tong Tin 200 \$ ...',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
+        border:OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white, width: 0.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(width: 1,color: Colors.white70),
+        ),
       ),
     );
     final vPrice = TextFormField(
@@ -112,14 +122,22 @@ class _CreatePropertyState extends State<CreateProperty> {
       autovalidate: _isAutoValidate,
       validator: (value) {
         if (value.isEmpty) {
-          return 'Please Enter Data';
+          return Language.errorFieldRequire();
         }
         return null;
       },
+      maxLength: 20,
+      style:  TextStyle(color: Colors.white),
       decoration: InputDecoration(
+        hintStyle: TextStyle(color: Colors.white70),
         hintText: 'ex: 200 (\$)',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
+        border:OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white, width: 0.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(width: 1,color: Colors.white70),
+        ),
       ),
     );
     final vTotalPeople = TextFormField(
@@ -128,26 +146,35 @@ class _CreatePropertyState extends State<CreateProperty> {
       keyboardType: TextInputType.number,
       validator: (value) {
         if (value.isEmpty) {
-          return 'Please Enter Data';
+          return Language.errorFieldRequire();
         }
         return null;
       },
+      maxLength: 6,
+      style:  TextStyle(color: Colors.white),
       decoration: InputDecoration(
+        hintStyle: TextStyle(color: Colors.white70),
         hintText: 'ex: 10 នាក់',
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
+        border:OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white, width: 0.5),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(width: 1,color: Colors.white70),
+        ),
       ),
     );
 
 
 
     final vStartMonth = OutlineButton(
-        shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(24.0)),
+        borderSide: BorderSide(color: Colors.white70),
+        shape: new RoundedRectangleBorder(borderRadius: new BorderRadius.circular(4.0), ),
         onPressed: () {
           DatePicker.showDatePicker(context,
               showTitleActions: true,
-              minTime: DateTime(2018, 3, 5),
-              maxTime: DateTime(2099, 6, 7), onChanged: (date) {
+              minTime: DateTime(2017, 1, 1),
+              maxTime: DateTime(2100, 1, 1), onChanged: (date) {
                 print('change $date');
               }, onConfirm: (date) {
                 print('confirm $date');
@@ -159,7 +186,7 @@ class _CreatePropertyState extends State<CreateProperty> {
         },
         child: Text(
           _currentDateTime,
-          style: TextStyle(color: Colors.blue),
+          style: TextStyle(color: Colors.white),
         ));
 
 
@@ -256,34 +283,76 @@ class _CreatePropertyState extends State<CreateProperty> {
       margin: EdgeInsets.only(top: 10),
       child:  ListView(
         shrinkWrap: true,
-        padding: EdgeInsets.only(left: 24.0, right: 24.0),
-        children: <Widget>[
-          topContent,
-          logo,
-          SizedBox(height: 28.0),
-          guideLine('កំណត់ចំណាំខ្លី(ex: Tong Tin 100\$)'),
-          vTitle,
-          SizedBox(height: 20.0),
-          guideLine('លេងមួយក្បាលប៉ុន្មាន (\$)?'),
-          vPrice,
-          SizedBox(height: 20.0),
-          guideLine('ចំនួនអ្នកលេង'),
-          vTotalPeople,
 
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: topContent,
+          ),
+          logo,
           SizedBox(height: 20.0),
-          guideLine('ថ្ងៃចាប់ផ្តើមលេង'),
-          vStartMonth,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2),
+            child: guideLine('កំណត់ចំណាំខ្លី(ex: Tong Tin 100\$)'),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: vTitle,
+          ),
+          SizedBox(height: 10.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2),
+            child: guideLine('លេងមួយក្បាលប៉ុន្មាន (\$)?'),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: vPrice,
+          ),
+          SizedBox(height: 10.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2),
+            child: guideLine('ចំនួនអ្នកលេង'),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: vTotalPeople,
+          ),
+
+          SizedBox(height: 10.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 2),
+            child: guideLine('ថ្ងៃចាប់ផ្តើមលេង'),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: vStartMonth,
+          ),
           SizedBox(height: 24.0),
-          confirmBtn,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: confirmBtn,
+          ),
 
 
         ],
       ),
     ));
 
-    return new Scaffold(
-      backgroundColor:  Colors.white,//Color.fromRGBO(64, 75, 96, .9),
-      body:   contentBody,
+    return Container(
+      decoration: BoxDecoration(
+          gradient: LinearGradient(
+              colors: [
+
+                Color(0xFF1b1e44),
+                Color(0xFF2d3447),
+              ],
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              tileMode: TileMode.clamp)),
+      child: new Scaffold(
+        backgroundColor:  Colors.transparent,//Color.fromRGBO(64, 75, 96, .9),
+        body:   contentBody,
+      ),
     );
   }
 
@@ -304,27 +373,29 @@ class _CreatePropertyState extends State<CreateProperty> {
     Property property = new Property(people: int.parse(tTotalPeopleController.text),
         title: tTitleController.text, startOn: startDate, createOn: createDate, amount: double.parse(tPriceController.text));
 
-    provider.addNewProperty(property, USER_ID);
+    provider.addNewProperty(property, widget.userID);
 
 
     await new Future.delayed(const Duration(seconds: 2));
     Navigator.pop(context);
     await Utils.startHapticSuccess();
     await new Future.delayed(const Duration(seconds: 1));
-    _prefs.then((f){
+
+    SharedPreferences.getInstance().then((sharePref){
+      var isDesc = sharePref.getBool(PrefUtil.KEY_SORT_DECS);
+      if(isDesc == null) isDesc = true;
       Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) =>ListPage(title : 'Persona ', userID: f.getString(PrefUtil.KEY_USER_ID),)));
+              builder: (context) =>ListPage(title : 'Persona ', userID: widget.userID, isDecs: isDesc,)));
     });
-
   }
 
 }
 
  Widget guideLine(String description){
 
-  return Text(description, style: TextStyle(fontSize: 12.0, color: Colors.blueAccent),);
+  return Text(description, style: TextStyle(fontSize: 12.0, color: Colors.white ),);
  }
 
  void showSnakeBar(BuildContext context){

@@ -5,19 +5,25 @@ import 'package:TonTin/core/viewmodels/CRUDModel.dart';
 import 'package:TonTin/model/customIcons.dart';
 import 'package:TonTin/model/data.dart';
 import 'package:TonTin/pages/login_page_fire.dart';
+import 'package:TonTin/ui/views/add_properties.dart';
 import 'package:TonTin/ui/views/tong_tin_detail_page.dart';
+import 'package:TonTin/ui/widgets/about_page.dart';
 import 'package:TonTin/ui/widgets/profile_page.dart';
+import 'package:TonTin/util/lang.dart';
+import 'package:TonTin/util/share_pref.dart';
 import 'package:TonTin/util/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ListPage extends StatefulWidget {
-  ListPage({Key key, this.title, this.userID}) : super(key: key);
+  ListPage({Key key, this.title, this.userID, this.isDecs = true}) : super(key: key);
 
   final String title;
   final String userID;
+  bool isDecs;
 
   @override
   _ListPageState createState() => _ListPageState();
@@ -28,12 +34,11 @@ class _ListPageState extends State<ListPage> {
 
   bool _isFetching = true;
   List<Property> properties = new List();
-  List<Property> propertiesState = new List();
+  final _prefs = SharedPreferences.getInstance();
   var currentPage = 0.0;
   var currentPageState = 0;
-  bool isHomeActive = true;
-  bool isProfileActive = false;
   List<int> imageList;
+  int tab = 0;
 
   @override
   void initState() {
@@ -41,7 +46,7 @@ class _ListPageState extends State<ListPage> {
     super.initState();
 
 
-    _fetchData(new CRUDModel(), widget.userID);
+    _fetchData(new CRUDModel(), widget.userID, isDesc: widget.isDecs);
 
   }
   @override
@@ -92,6 +97,7 @@ class _ListPageState extends State<ListPage> {
       }).toList()*/
 
 
+
     final makeBottom = Container(
       height: 60.0,
       child: BottomAppBar(
@@ -100,14 +106,10 @@ class _ListPageState extends State<ListPage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             IconButton(
-              icon: Icon(Icons.home, color:  isHomeActive ? Color(0xFFff6e6e) : Colors.white70,),
+              icon: Icon(Icons.opacity, color:  tab == 0 ? Color(0xFFff6e6e) : Colors.white70,),
               onPressed: () {
-                if(isHomeActive) return;
-                setState(() {
-                  isProfileActive = !isProfileActive;
-                  isHomeActive = !isHomeActive;
-
-                });
+                if(tab == 0) return;
+                _selectedTab(0);
 
                 WidgetsBinding.instance
                     .addPostFrameCallback((_){
@@ -118,20 +120,18 @@ class _ListPageState extends State<ListPage> {
             ),
 
             IconButton(
-              icon: Icon(Icons.account_box, color: isProfileActive ? Color(0xFFff6e6e) : Colors.white70,),
+              icon: Icon(Icons.account_circle, color: tab == 1 ? Color(0xFFff6e6e) : Colors.white70,),
               onPressed: () {
-                if(isProfileActive) return;
-                setState(() {
-                  isProfileActive = !isProfileActive;
-                  isHomeActive = !isHomeActive;
+                if(tab == 1) return;
 
-                });
-                if(true) return;
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => LoginPage()));
+                _selectedTab(1);
 
+              },
+            ), IconButton(
+              icon: Icon(Icons.info, color: tab == 2 ? Color(0xFFff6e6e) : Colors.white70,),
+              onPressed: () {
+                if(tab == 2) return;
+                _selectedTab(2);
               },
             )
           ],
@@ -148,15 +148,6 @@ class _ListPageState extends State<ListPage> {
     );
 
 
-    /*
-     body:isHomeActive ? Column(
-        children: <Widget>[
-          Expanded(child: widget.userID == null ? prompt : makeBody),
-          makeNewItem
-        ],
-      ): Profile(),
-      bottomNavigationBar: makeBottom,
-     */
 
     return Container(
       decoration: BoxDecoration(
@@ -172,7 +163,7 @@ class _ListPageState extends State<ListPage> {
       child: Scaffold(
         bottomNavigationBar: makeBottom,
         backgroundColor: Colors.transparent,
-        body: isHomeActive ?  SingleChildScrollView(
+        body: tab == 0 ?  SingleChildScrollView(
           child: Column(
             children: <Widget>[
               Padding(
@@ -196,7 +187,7 @@ class _ListPageState extends State<ListPage> {
                         color: Colors.white,
                         size: 30.0,
                       ),
-                      onPressed: () {},
+                      onPressed: () {_showBottomSheet(context);},
                     )
                   ],
                 ),
@@ -206,13 +197,25 @@ class _ListPageState extends State<ListPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Text("Persona",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 46.0,
-                          fontFamily: "Calibre-Semibold",
-                          letterSpacing: 1.0,
-                        )),
+
+                    Row(
+
+                      children: <Widget>[
+                        Text('${Language.app_name()}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 46.0,
+                              fontFamily: "Calibre-Semibold",
+                              letterSpacing: 1.0,
+                            )),
+                        Text('${concateTitle(properties.length)}',
+                            style: TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12.0,
+
+                            )),
+                      ],
+                    ),
                     IconButton(
                       icon: Icon(
                         Icons.add,
@@ -220,14 +223,18 @@ class _ListPageState extends State<ListPage> {
                         color:  properties.length != 0 ? Colors.white70 : Colors.white,
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, '/create');
+                        Utils.startHapticSuccess();
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CreateProperty(userID: widget.userID,)));
                       },
                     )
                   ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(left: 20.0),
+                padding: const EdgeInsets.only(left: 20.0, top: 10.0),
                 child: properties.length != 0 ? Row(
                   children: <Widget>[
                     Container(
@@ -266,7 +273,7 @@ class _ListPageState extends State<ListPage> {
 
             ],
           ),
-        ) : Profile(),
+        ) : tab == 1 ? Profile() : AboutPage(),
       ),
     );
   }
@@ -277,13 +284,12 @@ class _ListPageState extends State<ListPage> {
     Utils.startHapticSuccess();
 
   }
-  void _fetchData(CRUDModel provider, String userID){
-    var data =  provider.getAllProperties(userID);
+  void _fetchData(CRUDModel provider, String userID, {bool isDesc = true}){
+    var data =  provider.getAllProperties(userID, isDesc: isDesc);
     data.then((result){
       setState(() {
-        properties = result.reversed.toList();
+        properties = result;
         _isFetching = false;
-
 
       });
 
@@ -292,15 +298,22 @@ class _ListPageState extends State<ListPage> {
   var padding = 20.0;
   var verticalInset = 20.0;
 
+  Widget _selectedTab(int _tab){
+    setState(() {
+      tab = _tab;
+    });
 
+  }
   Widget _pageView( int index , Property property){
-    var r = index > 3 ? 2 : index;
+
+    var r = index > 9 ? 1 : index;
 
     return ClipRRect(
        borderRadius: BorderRadius.circular(24.0),
        child: GestureDetector(
          onTap: () {
            Utils.startHapticSuccess();
+           property.userId = widget.userID;
            Navigator.push(
                context,
                MaterialPageRoute(
@@ -328,7 +341,7 @@ class _ListPageState extends State<ListPage> {
                        Padding(
                          padding: EdgeInsets.symmetric(
                              horizontal: 16.0, vertical: 8.0),
-                         child: Text(property.title,
+                         child: Text('${property.title}' ,
                              style: TextStyle(
                                  color: Colors.white,
                                  fontSize: 25.0,
@@ -346,7 +359,7 @@ class _ListPageState extends State<ListPage> {
                            decoration: BoxDecoration(
                                color: Colors.blueAccent,
                                borderRadius: BorderRadius.circular(20.0)),
-                           child: Text("មើលបន្ថែម",
+                           child: Text('ថ្ងៃលេង ${Utils.dateConvert(property.startOn)}',
                                style: TextStyle(color: Colors.white)),
                          ),
                        )
@@ -362,126 +375,123 @@ class _ListPageState extends State<ListPage> {
 
 
   }
-}
+  void _showBottomSheet(BuildContext context){
 
-class CardScrollWidget extends StatelessWidget {
-  var currentPage;
-  var padding = 20.0;
-  var verticalInset = 20.0;
-  List<Property> properties;
-
-  CardScrollWidget(this.currentPage, this.properties);
-
-  @override
-  Widget build(BuildContext context) {
-    return new AspectRatio(
-      aspectRatio: widgetAspectRatio,
-      child: LayoutBuilder(builder: (context, contraints) {
-        var width = contraints.maxWidth;
-        var height = contraints.maxHeight;
-
-        var safeWidth = width - 2 * padding;
-        // var safeHeight = height - 2 * padding;
-        var safeHeight = height - 2 * padding;
-
-        var heightOfPrimaryCard = safeHeight ;
-        var widthOfPrimaryCard = heightOfPrimaryCard * cardAspectRatio;
-
-        var primaryCardLeft = safeWidth - widthOfPrimaryCard;
-        var horizontalInset = primaryCardLeft / 2;
-
-        List<Widget> cardList = new List();
-
-        for (var i = 0; i < properties.length; i++) {
-          var pos = i > 3 ? 0 : i;
-          var delta = i - currentPage;
-          bool isOnRight = delta > 0;
-
-          var start = padding +
-              max(
-                  primaryCardLeft -
-                      horizontalInset * -delta * (isOnRight ? 15 : 1),
-                  0.0);
-
-          var cardItem = Positioned.directional(
-            top: (padding  + verticalInset * max(-delta, 0.0)),
-            bottom: (padding + verticalInset * max(-delta, 0.0)) /1,
-            start: start,
-            textDirection: TextDirection.ltr,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(16.0),
-              child: new GestureDetector( onTap: ()=> print('wil will'),
-                child: Container(
-                  decoration: BoxDecoration(color: Colors.white, boxShadow: [
-                    BoxShadow(
-                        color: Colors.black12,
-                        offset: Offset(3.0, 6.0),
-                        blurRadius: 10.0)
-                  ]),
-                  child: AspectRatio(
-                    aspectRatio: cardAspectRatio,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: <Widget>[
-                        Image.asset(images[pos], fit: BoxFit.cover),
-                        Align(
-                          alignment: Alignment.bottomLeft,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 16.0, vertical: 8.0),
-                                child: Text(properties[i].title,
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 25.0,
-                                        fontFamily: "SF-Pro-Text-Regular")),
-                              ),
-                              SizedBox(
-                                height: 10.0,
-                              ),
-                               Padding(
-                                 padding: const EdgeInsets.only(
-                                     left: 12.0, bottom: 12.0),
-                                 child: Container(
-                                   padding: EdgeInsets.symmetric(
-                                       horizontal: 22.0, vertical: 6.0),
-                                   decoration: BoxDecoration(
-                                       color: Colors.blueAccent,
-                                       borderRadius: BorderRadius.circular(20.0)),
-                                   child: new GestureDetector(
-                                     onTap: ()=>  Navigator.push(
-                                         context,
-                                         MaterialPageRoute(
-                                             builder: (context) => DetailTongTinPage(property: null,))),
-                                     child: Text("មើលបន្ថែម",
-                                         style: TextStyle(color: Colors.white)),
-                                   ),
-                                 ),
-                               )
-                            ],
-                          ),
-                        )
-                      ],
+    showModalBottomSheet(
+        context: context,
+        backgroundColor: Color(0xFF2d3447),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),
+        ),
+        builder: (context) {
+          return Padding(
+            padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    SizedBox(
+                      height: 16.0,
                     ),
-                  ),
+                    Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                        child: Text('តម្រៀបតុងទីនតាម៖ ', style: TextStyle(color: Colors.white),)
+
+                    ),
+                    SizedBox(
+                      height: 8.0,
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                      child: new Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          Container(
+                              height: 30.0,
+                              width: 95.0,
+                              child: Material(
+                                borderRadius: BorderRadius.circular(20.0),
+                                shadowColor: Colors.black54,
+                                color: Colors.blueAccent,
+                                elevation: 7.0,
+                                child: InkWell(
+                                  onTap: (){
+                                    _prefs.then((f){
+                                     f.setBool(PrefUtil.KEY_SORT_DECS, true);
+
+                                      Navigator.pop(context);
+                                     setState(() {
+                                       _isFetching = true;
+                                     });
+                                      _fetchData(new CRUDModel(), widget.userID);
+
+                                    });
+                                  },
+                                  child: Center(
+                                    child: Text(
+                                      'ថ្ងៃថ្មី',
+                                      style: TextStyle(color: Colors.white, fontFamily: 'Montserrat'),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                          Container(
+                              height: 30.0,
+                              width: 95.0,
+                              child: Material(
+                                borderRadius: BorderRadius.circular(20.0),
+                                shadowColor: Colors.black54,
+                                color: Colors.red,
+                                elevation: 7.0,
+                                child: InkWell(
+                                  onTap: (){
+                                    _prefs.then((f){
+                                      f.setBool(PrefUtil.KEY_SORT_DECS, false);
+
+                                      Navigator.pop(context);
+                                      setState(() {
+                                        _isFetching = true;
+                                      });
+                                      _fetchData(new CRUDModel(), widget.userID, isDesc: false);
+
+                                    });
+                                  },
+                                  child: Center(
+                                    child: Text(
+                                      'ថ្ងៃចាស់',
+                                      style: TextStyle(color: Colors.white, fontFamily: 'Montserrat'),
+                                    ),
+                                  ),
+                                ),
+                              ))
+                        ],
+
+                      ),
+                    ),
+
+                    SizedBox(
+                      height: 4.0,
+                    ),
+
+
+
+                    SizedBox(height: 32),
+
+
+                  ],
                 ),
               ),
             ),
           );
-          cardList.add(cardItem);
-        }
-        return Stack(
-          children: cardList,
-        );
-      }),
-    );
+        });
   }
-
-
 }
+
 
 
 Widget promptNoItem() {
@@ -508,5 +518,9 @@ double calculateTheRemain(double total, double finish){
 double calculateRemainPeopleInPercentage(double total, double finish){
    return (finish * 100 / total) / 100;
 
+}
+String concateTitle(int size){
+  if(size <= 0) return '';
+  return '​​( $sizeក្បាល )';
 }
 

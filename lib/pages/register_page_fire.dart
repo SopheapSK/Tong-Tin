@@ -1,22 +1,16 @@
-import 'dart:convert' as JSON;
+import 'dart:io';
 
 import 'package:TonTin/core/models/productModel.dart';
 import 'package:TonTin/core/viewmodels/CRUDModel.dart';
-import 'package:TonTin/item/account.dart';
-import 'package:TonTin/item/login_token.dart';
+
 import 'package:TonTin/ui/views/home_list.dart';
-import 'package:TonTin/util/AESImpl.dart';
-import 'package:TonTin/util/NetworkService.dart';
-import 'package:TonTin/util/constant.dart';
+import 'package:TonTin/util/lang.dart';
 import 'package:TonTin/util/share_pref.dart';
 import 'package:TonTin/util/utils.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:local_auth/auth_strings.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vibrate/vibrate.dart';
 
 
 class RegisterPage extends StatefulWidget {
@@ -74,6 +68,7 @@ class _RegisterPageState extends State<RegisterPage> {
     final email = TextFormField(
       controller: userNameController,
       keyboardType: TextInputType.phone,
+      maxLength: 10,
       autofocus: false,
       style:  TextStyle(color: Colors.white),
       decoration: InputDecoration(
@@ -81,18 +76,16 @@ class _RegisterPageState extends State<RegisterPage> {
           Icons.smartphone,
           color: Colors.white70,
         ),
-        hintText: 'Phone Number',
+        hintText: Language.phoneNumber(),
         hintStyle: TextStyle(color: Colors.white70),
         hoverColor: Colors.transparent,
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
 
         border:OutlineInputBorder(
-          gapPadding: 32.0,
-          borderRadius:  BorderRadius.all(Radius.circular(24.0)),
-          borderSide: const BorderSide(color: Colors.white, width: 1.0),
+
+          borderSide: const BorderSide(color: Colors.white70, width: 0.5),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(24.0)),
           borderSide: BorderSide(width: 1,color: Colors.white70),
         ),
 
@@ -112,18 +105,17 @@ class _RegisterPageState extends State<RegisterPage> {
           Icons.security,
           color: Colors.white70,
         ),
-        hintText: 'Password',
+        hintText: Language.password(),
         hintStyle: TextStyle(color: Colors.white70),
         hoverColor: Colors.transparent,
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
 
         border:OutlineInputBorder(
-          gapPadding: 32.0,
-          borderRadius:  BorderRadius.all(Radius.circular(24.0)),
-          borderSide: const BorderSide(color: Colors.white, width: 1.0),
+
+          borderSide: const BorderSide(color: Colors.white, width: 0.5),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(24.0)),
+
           borderSide: BorderSide(width: 1,color: Colors.white70),
         ),
 
@@ -142,18 +134,15 @@ class _RegisterPageState extends State<RegisterPage> {
           Icons.security,
           color: Colors.white70,
         ),
-        hintText: 'Confirm Password',
+        hintText: Language.confirmPassword(),
         hintStyle: TextStyle(color: Colors.white70),
         hoverColor: Colors.transparent,
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
 
         border:OutlineInputBorder(
-          gapPadding: 32.0,
-          borderRadius:  BorderRadius.all(Radius.circular(24.0)),
-          borderSide: const BorderSide(color: Colors.white, width: 1.0),
+          borderSide: const BorderSide(color: Colors.white, width: 0.5),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(24.0)),
           borderSide: BorderSide(width: 1,color: Colors.white70),
         ),
 
@@ -182,7 +171,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
         padding: EdgeInsets.all(12),
         color: Colors.blueAccent,
-        child: Text(submitting ? 'Loading' : 'Go Now', style: TextStyle(color: Colors.white)),
+        child: Text(submitting ? Language.loading() : Language.register(), style: TextStyle(color: Colors.white)),
       ),
     );
 
@@ -249,12 +238,26 @@ class _RegisterPageState extends State<RegisterPage> {
     }
     var addLocalAuth = await localAuth();
 
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        print('connected');
+      }
+    } on SocketException catch (_) {
+      Utils.showToast(context, Language.errorInternetConnection());
+      return;
+    }
+
       var data = new Users(password: pw, phone: phone, createOn:  new DateTime.now().millisecondsSinceEpoch, fingerPrint:  addLocalAuth);
       setState(() {
         submitting = true;
       });
+
       var resultUser =  userProvider.addUser(data);
-      resultUser.then((res){
+      
+      //resultUser.timeout(Duration(seconds: 10)).then(onValue);
+      
+      resultUser.timeout(Duration(seconds: 45)).then((res){
 
         var userID =  userProvider.getUserID(phone, pw);
         userID.then((f){
@@ -273,7 +276,7 @@ class _RegisterPageState extends State<RegisterPage> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>ListPage(title : 'Persona ', userID: f.id,)));
+                    builder: (context) =>ListPage(title : 'Tong Tin', userID: f.id,)));
           });
 
       }, onError: (f){
@@ -285,6 +288,11 @@ class _RegisterPageState extends State<RegisterPage> {
 
 
 
+    }).catchError((onError){
+        setState(() {
+          submitting = false;
+        });
+        Utils.showToast(context, Language.errorInternetConnection());
     });
 
 

@@ -1,7 +1,4 @@
 
-
-import 'package:TonTin/item/account.dart';
-
 class Global{
   static final String BASE_URL = "https://ir.wingmoney.com:9443/WingRestEngine";
   static final String TOKEN_LOGIN_URL = "/oauth/token";
@@ -12,9 +9,6 @@ class Global{
   static String HEADER = '';
   static final String TOKEN_CONTENT_TYPE = 'application/x-www-form-urlencoded';
   static final String KEY_AES = "HG58YZ3CR9";
-
-  static List<AccountItem> accountItem = new List();
-
 
 
   // home menu

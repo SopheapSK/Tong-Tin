@@ -1,10 +1,10 @@
 import 'package:TonTin/core/models/productModel.dart';
 import 'package:TonTin/core/viewmodels/CRUDModel.dart';
-import 'package:TonTin/model/data.dart';
-import 'package:TonTin/model/lesson_model.dart';
+import 'package:TonTin/util/share_pref.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../util/utils.dart';
 import 'home_list.dart';
@@ -57,7 +57,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
       Container(
-        margin: EdgeInsets.all(16.0),
+        margin: EdgeInsets.all(12.0),
         child: IconButton(
           onPressed: () {
             Navigator.pop(context);
@@ -67,7 +67,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
       ),
 
       Container(
-        margin: EdgeInsets.all(16.0),
+        margin: EdgeInsets.all(12.0),
         child: IconButton(
           onPressed: () {
             _confirmDoneBid(context, 1, insideProperty, provider);
@@ -77,7 +77,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
         ),
       ),
       Container(
-        margin: EdgeInsets.all(16.0),
+        margin: EdgeInsets.all(12.0),
         child: IconButton(
           onPressed: () {
             _confirmDelete(context, 1, widget.property, provider);
@@ -90,45 +90,29 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
 
 
     return Scaffold(
-      body: Stack(
-        children:<Widget>[
+      body: Container(
+        decoration: BoxDecoration(
+            gradient: LinearGradient(
+                colors: [
 
+                  Color(0xFF1b1e44).withOpacity(1),
+                  Color(0xFF2d3447).withOpacity(1),
+                ],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                tileMode: TileMode.clamp)),
+        child: Column(
+          children: <Widget>[
 
-          Positioned.fill(  //
-            child: Hero(
-              tag: widget.property.id,
-              child:  ClipPath(
-                child: Container(color:Color(0xFF1b1e44).withOpacity(1)),
-                clipper: getClipper(),
-              ),
+            SizedBox(
+              height: 26.0,
             ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-                gradient: LinearGradient(
-                    colors: [
-
-                      Color(0xFF1b1e44),
-                      Color(0xFF2d3447).withOpacity(0.9),
-                    ],
-                    begin: Alignment.bottomCenter,
-                    end: Alignment.topCenter,
-                    tileMode: TileMode.clamp)),
-            child: Column(
-              children: <Widget>[
-
-                SizedBox(
-                  height: 30.0,
-                ),
-                topContent,
-                topContentText,
-                headerInfo(context, insideProperty),
-                Expanded(child: _buildList(context, insideProperty, provider))
-              ],
-            ),
-          ),
-
-        ],
+            topContent,
+            topContentText,
+            headerInfo(context, insideProperty),
+            Expanded(child: _buildList(context, insideProperty, provider))
+          ],
+        ),
       ),
     );
   }
@@ -298,7 +282,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
             child: Padding(
                 padding: EdgeInsets.only(left: 0.0),
                 child: Text(
-                    ' ការ​: \$$interest \n ដេញហើយ$info/${property.people} នាក់. \n បង់លុយ:\$ $amountToPay',
+                    ' ការ​: \$$interest \n ដេញហើយ $info/${property.people} នាក់. \n បង់លុយ: \$ $amountToPay',
                     style: TextStyle(color: Colors.white))),
           )
         ],
@@ -322,7 +306,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFF2d3447),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),
         ),
@@ -342,7 +326,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
                     ),
                     Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                        child: Text('ការប្រាក់សម្រាប់ខែទី ${index + 1}',)
+                        child: Text('ការប្រាក់សម្រាប់ខែទី ${index + 1}', style: TextStyle(color: Colors.white),)
 
                     ),
                     SizedBox(
@@ -352,13 +336,24 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
                       padding: EdgeInsets.only(
                           bottom: 10.0),
                       child: new TextField(
+
                         keyboardType: TextInputType.number,
                         controller: _controllers[index],
+                        style:  TextStyle(color: Colors.white),
                         decoration: InputDecoration(
-                          prefixIcon: Icon(Icons.attach_money, size: 12.0,),
+                          hintStyle: TextStyle(color: Colors.white70),
+                          prefixIcon: Icon(Icons.attach_money, size: 14.0, color: Colors.white,),
                           hintText: '(ex: 12.5\$ ) ',
                           contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 10.0, 10.0),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(24.0)),
+                          enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(24.0),
+                            borderSide: BorderSide(width: 1,color: Colors.white70),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(24.0),
+                            borderSide: BorderSide(width: 1,color: Colors.white),
+                          ),
                         ),
 
 
@@ -391,7 +386,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24.0),
             ),
-            color: Colors.blue,
+            color: Colors.blueAccent,
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
@@ -424,7 +419,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24.0),
             ),
-            color: Colors.blue,
+            color: Colors.blueAccent,
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
@@ -460,7 +455,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24.0),
             ),
-            color: Colors.blue,
+            color: Color(0xFFff6e6e),
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
@@ -494,7 +489,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24.0),
             ),
-            color: Colors.green,
+            color: Color(0xFFff6e6e),
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
@@ -523,10 +518,15 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
     print('start Delete');
     var me =  provider.removeTongTingByID(property.id, property.userId);
     me.then((f){
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) =>ListPage(title : 'Persona ', userID: property.userId,)));
+      SharedPreferences.getInstance().then((sharePref){
+        var isDesc = sharePref.getBool(PrefUtil.KEY_SORT_DECS);
+        if(isDesc == null) isDesc = true;
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>ListPage(title : 'Persona ', userID: property.userId, isDecs: isDesc,)));
+      });
+
     });
 
   }
@@ -578,7 +578,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFF2d3447),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),
         ),
@@ -595,7 +595,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
                   ),
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text('លុបតុងទីននេះចោល?',)
+                      child: Text('លុបតុងទីននេះចោល?', style: TextStyle(color: Colors.white),)
 
                   ),
                   SizedBox(height: 10),
@@ -613,7 +613,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xFF2d3447),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),
         ),
@@ -630,7 +630,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
                   ),
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text('បើអ្នកដេញរួចហើយ សុមចុចប៊ូតុង យល់ព្រម ខាងក្រមនេះ',)
+                      child: Text('បើអ្នកដេញរួចហើយ សុមចុចប៊ូតុង យល់ព្រម ខាងក្រមនេះ',style: TextStyle(color: Colors.white),)
 
                   ),
                   SizedBox(height: 10.0),
@@ -648,7 +648,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
     showModalBottomSheet(
         context: context,
         isScrollControlled: true,
-        backgroundColor: Colors.white,
+        backgroundColor:Color(0xFF2d3447),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(topLeft: Radius.circular(24.0), topRight: Radius.circular(24.0)),
         ),
@@ -666,7 +666,7 @@ class _DetailTongTinPageState extends State<DetailTongTinPage> {
 
                   Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Text('លុបការប្រាក់សម្រាប់ខែទី ${index + 1} ចោល?',)
+                      child: Text('លុបការប្រាក់សម្រាប់ខែទី ${index + 1} ចោល?', style: TextStyle(color: Colors.white),)
                   ),
                   SizedBox(height: 10.0),
                   _buttonDeleteInterest(context, index, property, provider),

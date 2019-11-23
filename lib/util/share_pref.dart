@@ -18,4 +18,5 @@ class PrefUtil{
   static   final String KEY_LOCAL_AUTH = "local_auth";
   static   final String KEY_USER_ID = "user_id_fb";
   static   final String KEY_HAS_ACC = "has_acc";
+  static   final String KEY_SORT_DECS = "sort_date";
 }
