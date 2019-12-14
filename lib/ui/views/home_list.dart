@@ -306,7 +306,7 @@ class _ListPageState extends State<ListPage> {
   }
   Widget _pageView( int index , Property property){
 
-    var r = index > 9 ? 1 : index;
+    var r = index > 14 ? 1 : index;
 
     return ClipRRect(
        borderRadius: BorderRadius.circular(24.0),
